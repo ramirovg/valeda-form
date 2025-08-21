@@ -16,13 +16,11 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
       <!-- Header with Logo and Date -->
       <div class="flex justify-between items-start mb-6">
         <div class="flex items-center">
-          <div class="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mr-4">
-            <span class="text-white font-bold text-lg">OL</span>
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold text-gray-800">OFTALMO LASER</h1>
-            <p class="text-sm text-gray-600">De Monterrey</p>
-          </div>
+          <img 
+            src="assets/logo-oftalmolaser-color.png" 
+            alt="Oftalmo Laser de Monterrey" 
+            class="h-16 mr-4 object-contain"
+          />
         </div>
         
         <div class="bg-green-600 text-white px-4 py-2 rounded">

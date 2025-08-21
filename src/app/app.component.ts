@@ -84,7 +84,7 @@ export class AppComponent {
         <style>
           body { font-family: Arial, sans-serif; margin: 20px; }
           .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-          .logo { width: 60px; height: 60px; background: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; }
+          .logo { height: 60px; object-fit: contain; }
           .company { margin-left: 15px; }
           .date-box { background: #16a34a; color: white; padding: 10px; border-radius: 5px; text-align: center; }
           .title { text-align: center; color: #2563eb; font-size: 20px; font-weight: bold; margin: 20px 0; }
@@ -105,11 +105,7 @@ export class AppComponent {
       <body>
         <div class="header">
           <div style="display: flex; align-items: center;">
-            <div class="logo">OL</div>
-            <div class="company">
-              <h1 style="margin: 0; font-size: 24px;">OFTALMO LASER</h1>
-              <p style="margin: 0; color: #666;">De Monterrey</p>
-            </div>
+            <img src="assets/logo-oftalmolaser-color.png" alt="Oftalmo Laser de Monterrey" class="logo" />
           </div>
           <div class="date-box">
             <div style="font-size: 12px;">FECHA</div>
