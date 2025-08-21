@@ -50,3 +50,14 @@ export const TREATMENT_EYE_OPTIONS = [
   { value: 'ojo-izquierdo', label: 'Ojo Izquierdo' },
   { value: 'ambos-ojos', label: 'Ambos Ojos' }
 ] as const;
+
+// Available technicians
+export const TECHNICIANS_LIST = [
+  'Mayra Ruiz',
+  'Mario Rodriguez',
+  'Elizabeth Perez',
+  'Monica Tovar',
+  'Eneyda Valdez',
+  'Felipe Ponce',
+  'Cristina Ruiz'
+] as const;

@@ -63,8 +63,19 @@ export class ValedaService {
     const newTreatment: ValedaTreatment = {
       ...treatment,
       id: this.generateId(),
-      sessions: this.initializeSessions()
+      // Preserve session data from form, or initialize empty sessions if none provided
+      sessions: treatment.sessions && treatment.sessions.length > 0 
+        ? treatment.sessions 
+        : this.initializeSessions()
     };
+    
+    console.log('🏥 Creating new treatment with session data:', {
+      treatmentId: newTreatment.id,
+      patientName: newTreatment.patient.nombre,
+      sessionsCount: newTreatment.sessions.length,
+      sessionsWithData: newTreatment.sessions.filter(s => s.tecnico || s.hora || s.fecha).length,
+      sessionData: newTreatment.sessions
+    });
     
     this.treatments.push(newTreatment);
     this.saveTreatments();
@@ -80,8 +91,20 @@ export class ValedaService {
     const index = this.treatments.findIndex(t => t.id === id);
     
     if (index === -1) {
+      console.log('❌ Treatment not found for update:', id);
       return of(null);
     }
+    
+    const sessionsWithData = treatment.sessions 
+      ? treatment.sessions.filter(s => s.tecnico || s.hora || s.fecha).length 
+      : 0;
+    
+    console.log('💾 Updating treatment with session data:', {
+      treatmentId: id,
+      patientName: treatment.patient?.nombre || this.treatments[index].patient.nombre,
+      sessionsWithData: sessionsWithData,
+      sessionData: treatment.sessions
+    });
     
     this.treatments[index] = { ...this.treatments[index], ...treatment };
     this.saveTreatments();

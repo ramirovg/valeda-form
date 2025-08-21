@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ValedaTreatment, Patient, Doctor, TREATMENT_EYE_OPTIONS, CLINIC_PHONE_LINES } from '../../models/valeda.models';
+import { ValedaTreatment, Patient, Doctor, TREATMENT_EYE_OPTIONS, CLINIC_PHONE_LINES, TECHNICIANS_LIST } from '../../models/valeda.models';
 import { DateUtilsService } from '../../services/date-utils.service';
 import { ValedaService } from '../../services/valeda.service';
 import { Subject } from 'rxjs';
@@ -148,17 +148,16 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
                     />
                   </td>
                   <td class="border border-gray-300 px-1 py-2">
-                    <select
+                    <input
+                      type="number"
                       [(ngModel)]="session.month"
                       [ngModelOptions]="{standalone: true}"
                       (change)="updateSessionDate(i)"
-                      class="w-16 px-1 py-1 border border-gray-200 rounded text-xs"
-                    >
-                      <option value="">M</option>
-                      <option *ngFor="let month of spanishMonths; let mi = index" [value]="mi">
-                        {{ month }}
-                      </option>
-                    </select>
+                      min="1"
+                      max="12"
+                      class="w-12 px-1 py-1 border border-gray-200 rounded text-center text-sm"
+                      placeholder="MM"
+                    />
                   </td>
                   <td class="border border-gray-300 px-1 py-2">
                     <input
@@ -173,14 +172,17 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
                     />
                   </td>
                   <td class="border border-gray-300 px-2 py-2">
-                    <input
-                      type="text"
+                    <select
                       [(ngModel)]="session.tecnico"
                       [ngModelOptions]="{standalone: true}"
                       (ngModelChange)="onSessionFieldChange()"
                       class="w-full px-2 py-1 border border-gray-200 rounded text-sm"
-                      placeholder="Técnico"
-                    />
+                    >
+                      <option value="">Seleccionar técnico</option>
+                      <option *ngFor="let tech of technicians" [value]="tech">
+                        {{ tech }}
+                      </option>
+                    </select>
                   </td>
                   <td class="border border-gray-300 px-2 py-2">
                     <input
@@ -223,8 +225,8 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
           ></textarea>
         </div>
 
-        <!-- Phone Lines -->
-        <div class="bg-green-600 text-white text-center py-3 rounded-md mb-6">
+        <!-- Phone Lines (Hidden on screen, visible when printing) -->
+        <div class="bg-green-600 text-white text-center py-3 rounded-md mb-6 hidden print:block">
           <div class="font-medium">
             {{ phoneLines.join(' | ') }}
           </div>
@@ -282,6 +284,7 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
   calculatedAge: number = 0;
   treatmentOptions = TREATMENT_EYE_OPTIONS;
   phoneLines = CLINIC_PHONE_LINES;
+  technicians = TECHNICIANS_LIST;
   spanishMonths = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   
   sessions: any[] = [];
@@ -334,7 +337,7 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
     this.sessions = Array.from({ length: 9 }, (_, index) => ({
       sessionNumber: index + 1,
       day: null,
-      month: '',
+      month: null,
       year: new Date().getFullYear(),
       tecnico: '',
       hora: '',
@@ -362,7 +365,7 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
         this.sessions[index] = {
           ...this.sessions[index],
           day: date.getDate(),
-          month: date.getMonth(),
+          month: date.getMonth() + 1, // Convert from JS month (0-11) to user month (1-12)
           year: date.getFullYear(),
           tecnico: session.tecnico || '',
           hora: session.hora || '',
@@ -388,16 +391,34 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
 
   updateSessionDate(index: number): void {
     const session = this.sessions[index];
-    if (session.day && session.month !== '' && session.year) {
-      session.fecha = new Date(session.year, session.month, session.day);
+    console.log(`📅 Updating session ${index + 1} date:`, {
+      sessionNumber: session.sessionNumber,
+      day: session.day,
+      month: session.month,
+      year: session.year
+    });
+    
+    if (session.day && session.month && session.year && session.month >= 1 && session.month <= 12) {
+      // Convert from user input (1-12) to JavaScript Date month (0-11)
+      session.fecha = new Date(session.year, session.month - 1, session.day);
+      console.log(`✅ Session ${index + 1} date created:`, session.fecha);
     } else {
       session.fecha = null;
+      console.log(`❌ Session ${index + 1} date cleared (incomplete data)`);
     }
     // Trigger debounced auto-save when dates change
     this.autoSaveSubject.next();
   }
 
   onSessionFieldChange(): void {
+    console.log('⏰ Session field changed, current sessions data:', 
+      this.sessions.map(s => ({
+        session: s.sessionNumber,
+        tecnico: s.tecnico,
+        hora: s.hora,
+        hasDate: !!s.fecha
+      }))
+    );
     // Trigger debounced auto-save
     this.autoSaveSubject.next();
   }
@@ -407,6 +428,20 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
     if (this.treatment?.id && this.treatmentForm.get('patientName')?.value && this.treatmentForm.get('doctorName')?.value) {
       this.isSaving = true;
       const formData = this.treatmentForm.value;
+      
+      const sessionData = this.sessions.map(session => ({
+        sessionNumber: session.sessionNumber,
+        fecha: session.fecha,
+        tecnico: session.tecnico || '',
+        hora: session.hora || ''
+      }));
+
+      console.log('💾 Auto-saving treatment data:', {
+        treatmentId: this.treatment.id,
+        patientName: formData.patientName,
+        sessionsWithData: sessionData.filter(s => s.tecnico || s.hora || s.fecha).length,
+        sessionData: sessionData
+      });
       
       const treatmentData: Partial<ValedaTreatment> = {
         patient: {
@@ -418,29 +453,43 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
           nombre: formData.doctorName
         },
         tipoTratamiento: formData.treatmentType,
-        sessions: this.sessions.map(session => ({
-          sessionNumber: session.sessionNumber,
-          fecha: session.fecha,
-          tecnico: session.tecnico || '',
-          hora: session.hora || ''
-        })),
+        sessions: sessionData,
         indicacionesAdicionales: formData.additionalIndications
       };
 
       this.valedaService.updateTreatment(this.treatment.id, treatmentData).subscribe({
         next: () => {
+          console.log('✅ Auto-save completed successfully');
           this.isSaving = false;
         },
-        error: () => {
+        error: (error) => {
+          console.log('❌ Auto-save failed:', error);
           this.isSaving = false;
         }
       });
+    } else {
+      console.log('⏸️ Auto-save skipped (no treatment ID or missing required fields)');
     }
   }
 
   onSubmit(): void {
     if (this.treatmentForm.valid) {
       const formData = this.treatmentForm.value;
+      
+      const sessionData = this.sessions.map(session => ({
+        sessionNumber: session.sessionNumber,
+        fecha: session.fecha,
+        tecnico: session.tecnico || '',
+        hora: session.hora || ''
+      }));
+
+      console.log('📋 Submitting treatment form:', {
+        isNewTreatment: !this.treatment?.id,
+        patientName: formData.patientName,
+        treatmentType: formData.treatmentType,
+        sessionsWithData: sessionData.filter(s => s.tecnico || s.hora || s.fecha).length,
+        fullSessionData: sessionData
+      });
       
       const treatmentData: Omit<ValedaTreatment, 'id'> = {
         patient: {
@@ -453,12 +502,7 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
         },
         fechaCreacion: this.treatment?.fechaCreacion || new Date(),
         tipoTratamiento: formData.treatmentType,
-        sessions: this.sessions.map(session => ({
-          sessionNumber: session.sessionNumber,
-          fecha: session.fecha,
-          tecnico: session.tecnico,
-          hora: session.hora
-        })),
+        sessions: sessionData,
         indicacionesAdicionales: formData.additionalIndications
       };
 
