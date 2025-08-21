@@ -1,9 +1,11 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ValedaTreatment, Patient, Doctor, TREATMENT_EYE_OPTIONS, CLINIC_PHONE_LINES } from '../../models/valeda.models';
 import { DateUtilsService } from '../../services/date-utils.service';
 import { ValedaService } from '../../services/valeda.service';
+import { Subject } from 'rxjs';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-valeda-form',
@@ -175,6 +177,7 @@ import { ValedaService } from '../../services/valeda.service';
                       type="text"
                       [(ngModel)]="session.tecnico"
                       [ngModelOptions]="{standalone: true}"
+                      (ngModelChange)="onSessionFieldChange()"
                       class="w-full px-2 py-1 border border-gray-200 rounded text-sm"
                       placeholder="Técnico"
                     />
@@ -184,6 +187,7 @@ import { ValedaService } from '../../services/valeda.service';
                       type="time"
                       [(ngModel)]="session.hora"
                       [ngModelOptions]="{standalone: true}"
+                      (ngModelChange)="onSessionFieldChange()"
                       class="w-full px-2 py-1 border border-gray-200 rounded text-sm"
                     />
                   </td>
@@ -226,11 +230,23 @@ import { ValedaService } from '../../services/valeda.service';
           </div>
         </div>
 
+        <!-- Auto-save indicator -->
+        <div *ngIf="isSaving" class="flex items-center justify-center mb-4">
+          <div class="flex items-center text-sm text-gray-600">
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Guardando automáticamente...
+          </div>
+        </div>
+
         <!-- Action Buttons -->
         <div class="flex flex-wrap gap-4 justify-center">
           <button
             type="submit"
-            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+            [disabled]="isSaving"
+            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
           >
             Guardar Tratamiento
           </button>
@@ -255,7 +271,7 @@ import { ValedaService } from '../../services/valeda.service';
     </div>
   `
 })
-export class ValedaFormComponent implements OnInit {
+export class ValedaFormComponent implements OnInit, OnDestroy {
   @Input() treatment?: ValedaTreatment;
   @Output() saved = new EventEmitter<ValedaTreatment>();
   @Output() cancelled = new EventEmitter<void>();
@@ -269,6 +285,9 @@ export class ValedaFormComponent implements OnInit {
   spanishMonths = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   
   sessions: any[] = [];
+  private destroy$ = new Subject<void>();
+  private autoSaveSubject = new Subject<void>();
+  isSaving = false;
 
   constructor(
     private fb: FormBuilder,
@@ -281,9 +300,24 @@ export class ValedaFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Set up debounced auto-save
+    this.autoSaveSubject
+      .pipe(
+        debounceTime(1000), // Wait 1 second after last change
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.performAutoSave();
+      });
+
     if (this.treatment) {
       this.loadTreatmentData();
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private initializeForm(): void {
@@ -358,6 +392,49 @@ export class ValedaFormComponent implements OnInit {
       session.fecha = new Date(session.year, session.month, session.day);
     } else {
       session.fecha = null;
+    }
+    // Trigger debounced auto-save when dates change
+    this.autoSaveSubject.next();
+  }
+
+  onSessionFieldChange(): void {
+    // Trigger debounced auto-save
+    this.autoSaveSubject.next();
+  }
+
+  private performAutoSave(): void {
+    // Only auto-save if we have an existing treatment and basic form is valid
+    if (this.treatment?.id && this.treatmentForm.get('patientName')?.value && this.treatmentForm.get('doctorName')?.value) {
+      this.isSaving = true;
+      const formData = this.treatmentForm.value;
+      
+      const treatmentData: Partial<ValedaTreatment> = {
+        patient: {
+          nombre: formData.patientName,
+          fechaNacimiento: new Date(formData.birthDate),
+          edad: this.calculatedAge
+        },
+        doctor: {
+          nombre: formData.doctorName
+        },
+        tipoTratamiento: formData.treatmentType,
+        sessions: this.sessions.map(session => ({
+          sessionNumber: session.sessionNumber,
+          fecha: session.fecha,
+          tecnico: session.tecnico || '',
+          hora: session.hora || ''
+        })),
+        indicacionesAdicionales: formData.additionalIndications
+      };
+
+      this.valedaService.updateTreatment(this.treatment.id, treatmentData).subscribe({
+        next: () => {
+          this.isSaving = false;
+        },
+        error: () => {
+          this.isSaving = false;
+        }
+      });
     }
   }
 
