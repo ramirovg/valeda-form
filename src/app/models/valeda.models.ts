@@ -1,37 +1,37 @@
 export interface Patient {
   id?: string;
-  nombre: string;
-  fechaNacimiento: Date;
-  edad?: number;
+  name: string;
+  birthDate: Date;
+  age?: number;
 }
 
 export interface Doctor {
   id?: string;
-  nombre: string;
+  name: string;
 }
 
 export interface TreatmentSession {
   sessionNumber: number;
-  fecha?: Date;
-  tecnico?: string;
-  hora?: string;
+  date?: Date;
+  technician?: string;
+  time?: string;
 }
 
 export interface ValedaTreatment {
   id?: string;
   patient: Patient;
   doctor: Doctor;
-  fechaCreacion: Date;
-  tipoTratamiento: 'ojo-derecho' | 'ojo-izquierdo' | 'ambos-ojos';
+  creationDate: Date;
+  treatmentType: 'right-eye' | 'left-eye' | 'both-eyes';
   sessions: TreatmentSession[];
-  notasImportantes?: string;
-  indicacionesAdicionales?: string;
+  importantNotes?: string;
+  additionalIndications?: string;
 }
 
 export interface SearchFilters {
-  nombre?: string;
-  fechaDesde?: Date;
-  fechaHasta?: Date;
+  name?: string;
+  dateFrom?: Date;
+  dateTo?: Date;
   doctor?: string;
 }
 
@@ -46,9 +46,9 @@ export const CLINIC_PHONE_LINES = [
 
 // Treatment eye options
 export const TREATMENT_EYE_OPTIONS = [
-  { value: 'ojo-derecho', label: 'Ojo Derecho' },
-  { value: 'ojo-izquierdo', label: 'Ojo Izquierdo' },
-  { value: 'ambos-ojos', label: 'Ambos Ojos' }
+  { value: 'right-eye', label: 'Ojo Derecho' },
+  { value: 'left-eye', label: 'Ojo Izquierdo' },
+  { value: 'both-eyes', label: 'Ambos Ojos' }
 ] as const;
 
 // Available technicians

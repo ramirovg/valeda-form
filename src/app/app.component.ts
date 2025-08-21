@@ -105,7 +105,7 @@ export class AppComponent {
       <body>
         <div class="header">
           <div style="display: flex; align-items: center;">
-            <img src="assets/logo-oftalmolaser-color.png" alt="Oftalmo Laser de Monterrey" class="logo" />
+            <img src="logo-oftalmolaser-color.png" alt="Oftalmo Laser de Monterrey" class="logo" />
           </div>
           <div class="date-box">
             <div style="font-size: 12px;">FECHA</div>

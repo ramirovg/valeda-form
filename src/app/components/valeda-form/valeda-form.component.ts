@@ -11,265 +11,7 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
   selector: 'app-valeda-form',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  template: `
-    <div class="bg-white rounded-lg shadow-md p-6">
-      <!-- Header with Logo and Date -->
-      <div class="flex justify-between items-start mb-6">
-        <div class="flex items-center">
-          <img 
-            src="assets/logo-oftalmolaser-color.png" 
-            alt="Oftalmo Laser de Monterrey" 
-            class="h-16 mr-4 object-contain"
-          />
-        </div>
-        
-        <div class="bg-green-600 text-white px-4 py-2 rounded">
-          <div class="text-center">
-            <div class="text-sm font-medium">FECHA</div>
-            <div class="text-lg">{{ currentDate }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Form Title -->
-      <h2 class="text-center text-xl font-bold text-blue-600 mb-6">
-        TRATAMIENTO DE FOTOBIOMODULACIÓN CON VALEDA
-      </h2>
-
-      <form [formGroup]="treatmentForm" (ngSubmit)="onSubmit()">
-        <!-- Patient Information -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Nombre del Paciente *
-            </label>
-            <input
-              type="text"
-              formControlName="patientName"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Ingrese el nombre completo del paciente"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Fecha de Nacimiento *
-            </label>
-            <input
-              type="date"
-              formControlName="birthDate"
-              (change)="onBirthDateChange()"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Edad
-            </label>
-            <input
-              type="number"
-              [value]="calculatedAge"
-              readonly
-              class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-              placeholder="Se calcula automáticamente"
-            />
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Nombre del Médico *
-            </label>
-            <input
-              type="text"
-              formControlName="doctorName"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Ingrese el nombre del médico"
-            />
-          </div>
-        </div>
-
-        <!-- Treatment Type -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-3">
-            Tx Valeda *
-          </label>
-          <div class="flex flex-wrap gap-4">
-            <div *ngFor="let option of treatmentOptions" class="flex items-center">
-              <input
-                type="radio"
-                [id]="option.value"
-                [value]="option.value"
-                formControlName="treatmentType"
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
-              />
-              <label [for]="option.value" class="ml-2 text-sm font-medium text-gray-700">
-                {{ option.label }}
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Treatment Sessions -->
-        <div class="mb-6">
-          <h3 class="text-lg font-medium text-gray-800 mb-4 text-center">
-            FECHAS DE SESIONES DEL TRATAMIENTO
-          </h3>
-          
-          <div class="overflow-x-auto">
-            <table class="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr class="bg-gray-50">
-                  <th class="border border-gray-300 px-3 py-2 text-left font-medium">Sesión</th>
-                  <th class="border border-gray-300 px-3 py-2 text-left font-medium">D</th>
-                  <th class="border border-gray-300 px-3 py-2 text-left font-medium">M</th>
-                  <th class="border border-gray-300 px-3 py-2 text-left font-medium">A</th>
-                  <th class="border border-gray-300 px-3 py-2 text-left font-medium">Técnico</th>
-                  <th class="border border-gray-300 px-3 py-2 text-left font-medium">Hora</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let session of sessions; let i = index">
-                  <td class="border border-gray-300 px-3 py-2 font-medium">
-                    Sesión {{ session.sessionNumber }}
-                  </td>
-                  <td class="border border-gray-300 px-1 py-2">
-                    <input
-                      type="number"
-                      [(ngModel)]="session.day"
-                      [ngModelOptions]="{standalone: true}"
-                      (change)="updateSessionDate(i)"
-                      min="1"
-                      max="31"
-                      class="w-12 px-1 py-1 border border-gray-200 rounded text-center text-sm"
-                      placeholder="DD"
-                    />
-                  </td>
-                  <td class="border border-gray-300 px-1 py-2">
-                    <input
-                      type="number"
-                      [(ngModel)]="session.month"
-                      [ngModelOptions]="{standalone: true}"
-                      (change)="updateSessionDate(i)"
-                      min="1"
-                      max="12"
-                      class="w-12 px-1 py-1 border border-gray-200 rounded text-center text-sm"
-                      placeholder="MM"
-                    />
-                  </td>
-                  <td class="border border-gray-300 px-1 py-2">
-                    <input
-                      type="number"
-                      [(ngModel)]="session.year"
-                      [ngModelOptions]="{standalone: true}"
-                      (change)="updateSessionDate(i)"
-                      min="2024"
-                      max="2030"
-                      class="w-16 px-1 py-1 border border-gray-200 rounded text-center text-sm"
-                      placeholder="AAAA"
-                    />
-                  </td>
-                  <td class="border border-gray-300 px-2 py-2">
-                    <select
-                      [(ngModel)]="session.tecnico"
-                      [ngModelOptions]="{standalone: true}"
-                      (ngModelChange)="onSessionFieldChange()"
-                      class="w-full px-2 py-1 border border-gray-200 rounded text-sm"
-                    >
-                      <option value="">Seleccionar técnico</option>
-                      <option *ngFor="let tech of technicians" [value]="tech">
-                        {{ tech }}
-                      </option>
-                    </select>
-                  </td>
-                  <td class="border border-gray-300 px-2 py-2">
-                    <input
-                      type="time"
-                      [(ngModel)]="session.hora"
-                      [ngModelOptions]="{standalone: true}"
-                      (ngModelChange)="onSessionFieldChange()"
-                      class="w-full px-2 py-1 border border-gray-200 rounded text-sm"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Important Notes -->
-        <div class="mb-6">
-          <div class="bg-green-100 p-4 rounded-md">
-            <h4 class="font-medium text-gray-800 mb-2">NOTAS IMPORTANTES</h4>
-            <p class="text-sm text-gray-700 mb-2">
-              El Tratamiento deberá de realizarse cada tres días (ej) Lunes, Miércoles y Viernes o Martes, Jueves y Sábados
-            </p>
-            <p class="text-sm text-gray-700">
-              Si no acude a alguna de sus citas favor de reportarse a la brevedad a Oftalmo Laser de Monterrey para reagendar el resto de sus sesiones
-            </p>
-          </div>
-        </div>
-
-        <!-- Additional Indications -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            INDICACIONES ADICIONALES
-          </label>
-          <textarea
-            formControlName="additionalIndications"
-            rows="4"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Ingrese indicaciones adicionales para el tratamiento..."
-          ></textarea>
-        </div>
-
-        <!-- Phone Lines (Hidden on screen, visible when printing) -->
-        <div class="bg-green-600 text-white text-center py-3 rounded-md mb-6 hidden print:block">
-          <div class="font-medium">
-            {{ phoneLines.join(' | ') }}
-          </div>
-        </div>
-
-        <!-- Auto-save indicator -->
-        <div *ngIf="isSaving" class="flex items-center justify-center mb-4">
-          <div class="flex items-center text-sm text-gray-600">
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Guardando automáticamente...
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex flex-wrap gap-4 justify-center">
-          <button
-            type="submit"
-            [disabled]="isSaving"
-            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
-          >
-            Guardar Tratamiento
-          </button>
-          
-          <button
-            type="button"
-            (click)="onPrint()"
-            class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
-          >
-            🖨️ Imprimir
-          </button>
-          
-          <button
-            type="button"
-            (click)="onCancel()"
-            class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors font-medium"
-          >
-            Cancelar
-          </button>
-        </div>
-      </form>
-    </div>
-  `
+  templateUrl: './valeda-form.component.html',
 })
 export class ValedaFormComponent implements OnInit, OnDestroy {
   @Input() treatment?: ValedaTreatment;
@@ -284,7 +26,7 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
   phoneLines = CLINIC_PHONE_LINES;
   technicians = TECHNICIANS_LIST;
   spanishMonths = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-  
+
   sessions: any[] = [];
   private destroy$ = new Subject<void>();
   private autoSaveSubject = new Subject<void>();
@@ -337,9 +79,9 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
       day: null,
       month: null,
       year: new Date().getFullYear(),
-      tecnico: '',
-      hora: '',
-      fecha: null
+      technician: '',
+      time: '',
+      date: null
     }));
   }
 
@@ -347,33 +89,33 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
     if (!this.treatment) return;
 
     this.treatmentForm.patchValue({
-      patientName: this.treatment.patient.nombre,
-      birthDate: this.treatment.patient.fechaNacimiento.toISOString().split('T')[0],
-      doctorName: this.treatment.doctor.nombre,
-      treatmentType: this.treatment.tipoTratamiento,
-      additionalIndications: this.treatment.indicacionesAdicionales || ''
+      patientName: this.treatment.patient.name,
+      birthDate: this.treatment.patient.birthDate.toISOString().split('T')[0],
+      doctorName: this.treatment.doctor.name,
+      treatmentType: this.treatment.treatmentType,
+      additionalIndications: this.treatment.additionalIndications || ''
     });
 
-    this.calculatedAge = this.treatment.patient.edad || 0;
+    this.calculatedAge = this.treatment.patient.age || 0;
 
     // Load session data
     this.treatment.sessions.forEach((session, index) => {
-      if (session.fecha) {
-        const date = new Date(session.fecha);
+      if (session.date) {
+        const date = new Date(session.date);
         this.sessions[index] = {
           ...this.sessions[index],
           day: date.getDate(),
           month: date.getMonth() + 1, // Convert from JS month (0-11) to user month (1-12)
           year: date.getFullYear(),
-          tecnico: session.tecnico || '',
-          hora: session.hora || '',
-          fecha: session.fecha
+          technician: session.technician || '',
+          time: session.time || '',
+          date: session.date
         };
       } else {
         this.sessions[index] = {
           ...this.sessions[index],
-          tecnico: session.tecnico || '',
-          hora: session.hora || ''
+          technician: session.technician || '',
+          time: session.time || ''
         };
       }
     });
@@ -395,7 +137,7 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
       month: session.month,
       year: session.year
     });
-    
+
     if (session.day && session.month && session.year && session.month >= 1 && session.month <= 12) {
       // Convert from user input (1-12) to JavaScript Date month (0-11)
       session.fecha = new Date(session.year, session.month - 1, session.day);
@@ -409,7 +151,7 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
   }
 
   onSessionFieldChange(): void {
-    console.log('⏰ Session field changed, current sessions data:', 
+    console.log('⏰ Session field changed, current sessions data:',
       this.sessions.map(s => ({
         session: s.sessionNumber,
         tecnico: s.tecnico,
@@ -426,7 +168,7 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
     if (this.treatment?.id && this.treatmentForm.get('patientName')?.value && this.treatmentForm.get('doctorName')?.value) {
       this.isSaving = true;
       const formData = this.treatmentForm.value;
-      
+
       const sessionData = this.sessions.map(session => ({
         sessionNumber: session.sessionNumber,
         fecha: session.fecha,
@@ -440,7 +182,7 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
         sessionsWithData: sessionData.filter(s => s.tecnico || s.hora || s.fecha).length,
         sessionData: sessionData
       });
-      
+
       const treatmentData: Partial<ValedaTreatment> = {
         patient: {
           nombre: formData.patientName,
@@ -473,7 +215,7 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (this.treatmentForm.valid) {
       const formData = this.treatmentForm.value;
-      
+
       const sessionData = this.sessions.map(session => ({
         sessionNumber: session.sessionNumber,
         fecha: session.fecha,
@@ -488,7 +230,7 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
         sessionsWithData: sessionData.filter(s => s.tecnico || s.hora || s.fecha).length,
         fullSessionData: sessionData
       });
-      
+
       const treatmentData: Omit<ValedaTreatment, 'id'> = {
         patient: {
           nombre: formData.patientName,
@@ -529,7 +271,7 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
     if (this.treatmentForm.dirty) {
       this.onSubmit();
     }
-    
+
     // Create a treatment object for printing
     const currentTreatment: ValedaTreatment = this.treatment || {
       id: 'temp',

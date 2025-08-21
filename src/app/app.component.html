@@ -7,23 +7,23 @@
     </div>
 
     <!-- Search View -->
-    <div *ngIf="currentView === 'search'">
+    @if (currentView === 'search') {
       <app-patient-search
         (treatmentSelected)="onTreatmentSelected($event)"
         (createNewTreatment)="onCreateNewTreatment()"
         (printRequested)="onPrintTreatment($event)"
       ></app-patient-search>
-    </div>
+    }
 
     <!-- Form View -->
-    <div *ngIf="currentView === 'form'">
+    @if (currentView === 'form') {
       <app-valeda-form
         [treatment]="selectedTreatment"
         (saved)="onTreatmentSaved($event)"
         (cancelled)="onFormCancelled()"
         (printRequested)="onPrintTreatment($event)"
       ></app-valeda-form>
-    </div>
+    }
   </div>
 </div>
 

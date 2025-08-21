@@ -26,19 +26,19 @@ export class ValedaService {
    */
   searchTreatments(filters: SearchFilters): Observable<ValedaTreatment[]> {
     const filtered = this.treatments.filter(treatment => {
-      if (filters.nombre && !treatment.patient.nombre.toLowerCase().includes(filters.nombre.toLowerCase())) {
+      if (filters.name && !treatment.patient.name.toLowerCase().includes(filters.name.toLowerCase())) {
         return false;
       }
       
-      if (filters.doctor && !treatment.doctor.nombre.toLowerCase().includes(filters.doctor.toLowerCase())) {
+      if (filters.doctor && !treatment.doctor.name.toLowerCase().includes(filters.doctor.toLowerCase())) {
         return false;
       }
       
-      if (filters.fechaDesde && treatment.fechaCreacion < filters.fechaDesde) {
+      if (filters.dateFrom && treatment.creationDate < filters.dateFrom) {
         return false;
       }
       
-      if (filters.fechaHasta && treatment.fechaCreacion > filters.fechaHasta) {
+      if (filters.dateTo && treatment.creationDate > filters.dateTo) {
         return false;
       }
       
@@ -71,9 +71,9 @@ export class ValedaService {
     
     console.log('🏥 Creating new treatment with session data:', {
       treatmentId: newTreatment.id,
-      patientName: newTreatment.patient.nombre,
+      patientName: newTreatment.patient.name,
       sessionsCount: newTreatment.sessions.length,
-      sessionsWithData: newTreatment.sessions.filter(s => s.tecnico || s.hora || s.fecha).length,
+      sessionsWithData: newTreatment.sessions.filter(s => s.technician || s.time || s.date).length,
       sessionData: newTreatment.sessions
     });
     
@@ -96,12 +96,12 @@ export class ValedaService {
     }
     
     const sessionsWithData = treatment.sessions 
-      ? treatment.sessions.filter(s => s.tecnico || s.hora || s.fecha).length 
+      ? treatment.sessions.filter(s => s.technician || s.time || s.date).length 
       : 0;
     
     console.log('💾 Updating treatment with session data:', {
       treatmentId: id,
-      patientName: treatment.patient?.nombre || this.treatments[index].patient.nombre,
+      patientName: treatment.patient?.name || this.treatments[index].patient.name,
       sessionsWithData: sessionsWithData,
       sessionData: treatment.sessions
     });
@@ -136,9 +136,9 @@ export class ValedaService {
   private initializeSessions(): TreatmentSession[] {
     return Array.from({ length: 9 }, (_, index) => ({
       sessionNumber: index + 1,
-      fecha: undefined,
-      tecnico: '',
-      hora: ''
+      date: undefined,
+      technician: '',
+      time: ''
     }));
   }
 
@@ -173,11 +173,11 @@ export class ValedaService {
           this.treatments = JSON.parse(stored);
           // Convert date strings back to Date objects
           this.treatments.forEach(treatment => {
-            treatment.fechaCreacion = new Date(treatment.fechaCreacion);
-            treatment.patient.fechaNacimiento = new Date(treatment.patient.fechaNacimiento);
+            treatment.creationDate = new Date(treatment.creationDate);
+            treatment.patient.birthDate = new Date(treatment.patient.birthDate);
             treatment.sessions.forEach(session => {
-              if (session.fecha) {
-                session.fecha = new Date(session.fecha);
+              if (session.date) {
+                session.date = new Date(session.date);
               }
             });
           });
@@ -195,10 +195,10 @@ export class ValedaService {
    */
   getSampleDoctors(): Observable<Doctor[]> {
     const sampleDoctors: Doctor[] = [
-      { id: '1', nombre: 'Dr. García Hernández' },
-      { id: '2', nombre: 'Dra. María Rodríguez' },
-      { id: '3', nombre: 'Dr. Carlos Mendoza' },
-      { id: '4', nombre: 'Dra. Ana Martínez' }
+      { id: '1', name: 'Dr. García Hernández' },
+      { id: '2', name: 'Dra. María Rodríguez' },
+      { id: '3', name: 'Dr. Carlos Mendoza' },
+      { id: '4', name: 'Dra. Ana Martínez' }
     ];
     return of(sampleDoctors);
   }
