@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an Angular 18 application called "valeda-form" with Server-Side Rendering (SSR) support. It's a standalone Angular application using the modern Angular architecture with standalone components and signal-based change detection.
+This is an Angular 20 application called "valeda-form" with Server-Side Rendering (SSR) support. It's a standalone Angular application using the modern Angular architecture with standalone components and signal-based change detection. The project includes TailwindCSS v3 and Flowbite for UI components.
 
 ## Development Commands
 
@@ -22,16 +22,20 @@ This is an Angular 18 application called "valeda-form" with Server-Side Renderin
 ## Architecture
 
 ### Application Structure
-- **Standalone Components**: Uses Angular 18's standalone component architecture
+- **Standalone Components**: Uses Angular 20's standalone component architecture
 - **SSR Enabled**: Full server-side rendering with hydration support
 - **Express Server**: Custom Express server (`server.ts`) for SSR serving
 - **Routing**: Angular Router with empty routes configuration (ready for expansion)
+- **UI Framework**: TailwindCSS v3.4.17 for utility-first CSS
+- **Component Library**: Flowbite v3.1.2 for pre-built UI components
 
 ### Key Configuration Files
 - `angular.json`: Angular CLI workspace configuration with SSR setup
 - `server.ts`: Express server for SSR rendering
 - `src/main.server.ts`: Server-side bootstrapping
 - `tsconfig.app.json`, `tsconfig.spec.json`: TypeScript configurations
+- `tailwind.config.js`: TailwindCSS configuration with Flowbite plugin
+- `postcss.config.js`: PostCSS configuration for TailwindCSS processing
 
 ### Component Architecture
 - Uses standalone components (no NgModules)
@@ -51,9 +55,24 @@ This is an Angular 18 application called "valeda-form" with Server-Side Renderin
 - **Test Configuration**: Uses `tsconfig.spec.json`
 - **Coverage**: Karma coverage reporting enabled
 
+## UI Development
+
+### TailwindCSS
+- Uses TailwindCSS v3.4.17 for utility-first CSS
+- Configuration includes Flowbite plugin for extended components
+- PostCSS processes TailwindCSS during build
+- All TailwindCSS directives are imported in `src/styles.css`
+
+### Flowbite Components
+- Flowbite v3.1.2 provides pre-built UI components
+- JavaScript imported in `src/main.ts` for interactive components
+- Components include buttons, alerts, badges, modals, dropdowns, etc.
+- Fully compatible with TailwindCSS utility classes
+
 ## Development Notes
 
-- This is a fresh Angular 18 project with minimal customization
-- No custom rules or specific development practices are currently defined
+- Upgraded from Angular 18 to Angular 20 (latest version)
+- TailwindCSS and Flowbite are fully integrated and functional
 - The routes array is empty, ready for route definitions
 - SSR is pre-configured and functional
+- Build process includes TailwindCSS compilation and optimization
