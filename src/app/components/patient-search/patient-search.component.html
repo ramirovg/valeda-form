@@ -1,76 +1,116 @@
-<div class="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-6">Buscar Paciente</h2>
+<!-- Quick Action - New Treatment -->
+<div class="mb-8">
+  <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 text-white shadow-lg">
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="text-xl font-semibold mb-2">Registrar Nuevo Paciente</h3>
+        <p class="text-green-100">Crear el expediente de un nuevo paciente e iniciar su tratamiento</p>
+      </div>
+      <button
+        type="button"
+        (click)="onCreateNew()"
+        class="px-8 py-4 bg-white text-green-700 rounded-xl hover:bg-green-50 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center"
+      >
+        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+Nuevo Paciente
+      </button>
+    </div>
+  </div>
+</div>
 
-  <!-- Search Filters -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Nombre del Paciente
-          </label>
-          <input
-            type="text"
-            [(ngModel)]="searchFilters.name"
-            (input)="onSearch()"
-            placeholder="Buscar por nombre..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            Médico
-          </label>
-          <input
-            type="text"
-            [(ngModel)]="searchFilters.doctor"
-            (input)="onSearch()"
-            placeholder="Buscar por médico..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-
-        <div class="flex items-end">
-          <button
-            type="button"
-            (click)="clearSearch()"
-            class="w-full px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-          >
-            Limpiar Búsqueda
-          </button>
-        </div>
+<!-- Search Section -->
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-8">
+  <div class="bg-gray-50 rounded-t-xl px-6 py-4 border-b border-gray-200">
+    <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+      <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+      Buscar Tratamientos Existentes
+    </h3>
+    <p class="text-gray-600 text-sm mt-1">Encuentra y gestiona tratamientos previamente creados</p>
+  </div>
+  
+  <div class="p-6">
+    <!-- Search Filters -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Nombre del Paciente
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="searchFilters.name"
+          (input)="onSearch()"
+          placeholder="Buscar por nombre..."
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+        />
       </div>
 
-  <!-- Action Buttons -->
-      <div class="flex gap-4 mb-6">
-        <button
-          type="button"
-          (click)="onCreateNew()"
-          class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
-        >
-          + Nuevo Tratamiento
-        </button>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Médico
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="searchFilters.doctor"
+          (input)="onSearch()"
+          placeholder="Buscar por médico..."
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+        />
+      </div>
 
+      <div class="flex items-end">
         <button
           type="button"
-          (click)="onSearch()"
-          class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+          (click)="clearSearch()"
+          class="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 font-medium border border-gray-300"
         >
-          🔍 Buscar
+          <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+          Limpiar Filtros
         </button>
       </div>
+    </div>
+    
+    <!-- Search Button -->
+    <div class="flex justify-center">
+      <button
+        type="button"
+        (click)="onSearch()"
+        class="px-8 py-3 bg-green-600 text-white border-2 border-green-600 rounded-xl hover:bg-green-700 hover:border-green-700 transition-all duration-200 font-semibold shadow-md hover:shadow-lg flex items-center"
+      >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        Buscar Tratamientos
+      </button>
+    </div>
+  </div>
+</div>
+
 
   <!-- Search Results -->
-  @if (searchResults.length > 0) {
+@if (searchResults.length > 0) {
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <div class="bg-gradient-to-r from-green-50 to-green-100 px-6 py-4 border-b border-green-200">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold text-green-800 flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+          </svg>
+          Tratamientos Encontrados
+        </h3>
+        <span class="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-medium">{{ searchResults.length }}</span>
+      </div>
+    </div>
 
-    <div class="border border-gray-200 rounded-md">
-        <div class="bg-gray-50 px-4 py-2 border-b">
-          <h3 class="font-medium text-gray-800">Resultados de Búsqueda ({{ searchResults.length }})</h3>
-        </div>
-
-        <div class="max-h-96 overflow-y-auto">
+    <div class="max-h-96 overflow-y-auto">
           @for (treatment of searchResults; track trackByTreatment(0, treatment)) {
             <div
-              class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+              class="px-6 py-4 border-b border-gray-100 hover:bg-green-50 cursor-pointer transition-colors duration-200"
               (click)="selectTreatment(treatment)"
             >
             <div class="flex justify-between items-start">
@@ -89,9 +129,9 @@
                 </p>
               </div>
 
-              <div class="flex gap-2">
+              <div class="flex items-center gap-3">
                 <span
-                  class="px-2 py-1 text-xs rounded-full"
+                  class="px-3 py-1 text-xs font-medium rounded-full"
                   [class]="getSessionStatusClass(treatment)"
                 >
                   {{ getSessionStatusText(treatment) }}
@@ -99,10 +139,12 @@
 
                 <button
                   (click)="printTreatment(treatment, $event)"
-                  class="px-3 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 transition-colors"
-                  title="Imprimir"
+                  class="px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                  title="Imprimir Tratamiento"
                 >
-                  🖨️
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -113,21 +155,23 @@
 
   }
 
-
-  <!-- No Results -->
-  @if (hasSearched && searchResults.length === 0) {
-
-    <div  class="text-center py-8 text-gray-500">
-        <p>No se encontraron resultados para la búsqueda actual.</p>
-        <button
-          type="button"
-          (click)="onCreateNew()"
-          class="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-        >
-          Crear Nuevo Tratamiento
-        </button>
-      </div>
-
-  }
-
-    </div>
+<!-- No Results -->
+@if (hasSearched && searchResults.length === 0) {
+  <div class="text-center py-12 bg-white rounded-xl border border-gray-200 shadow-sm">
+    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.463.822-6.14 2.196A7.962 7.962 0 006 13.291c.868-.298 1.796-.453 2.75-.453a8.04 8.04 0 003.5.808A8.04 8.04 0 0015.25 12.838c.954 0 1.882.155 2.75.453z"></path>
+    </svg>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">Sin Resultados</h3>
+    <p class="text-gray-500 mb-6">No se encontraron tratamientos que coincidan con los criterios de búsqueda.</p>
+    <button
+      type="button"
+      (click)="onCreateNew()"
+      class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
+    >
+      <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+      </svg>
+Registrar Primer Paciente
+    </button>
+  </div>
+}

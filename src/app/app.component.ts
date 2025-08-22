@@ -86,101 +86,276 @@ export class AppComponent {
         <meta charset="utf-8">
         <title>Tratamiento Valeda - ${treatment.patient.name}</title>
         <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-          .logo { height: 60px; object-fit: contain; }
-          .company { margin-left: 15px; }
-          .date-box { background: #16a34a; color: white; padding: 10px; border-radius: 5px; text-align: center; }
-          .title { text-align: center; color: #2563eb; font-size: 20px; font-weight: bold; margin: 20px 0; }
-          .form-section { margin-bottom: 15px; }
-          .form-row { display: flex; margin-bottom: 10px; }
-          .form-field { margin-right: 20px; }
-          .sessions-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-          .sessions-table th, .sessions-table td { border: 1px solid #333; padding: 8px; text-align: left; }
-          .sessions-table th { background: #f5f5f5; font-weight: bold; }
-          .notes { background: #f0fdf4; padding: 15px; border-radius: 5px; margin: 15px 0; }
-          .phone-lines { background: #16a34a; color: white; text-align: center; padding: 10px; border-radius: 5px; font-weight: bold; }
-          @media print { 
-            body { margin: 0; }
-            .no-print { display: none; }
+          @page {
+            size: A4;
+            margin: 0.5in;
+          }
+          body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0;
+            color: #000;
+            line-height: 1.2;
+            font-size: 11px;
+          }
+          .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 8px 0;
+            border-bottom: 2px solid #168D4D;
+            margin-bottom: 12px;
+          }
+          .logo-section {
+            display: flex;
+            align-items: center;
+          }
+          .logo { 
+            height: 35px; 
+            object-fit: contain;
+            margin-right: 12px;
+          }
+          .clinic-info {
+            text-align: left;
+          }
+          .clinic-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 2px;
+            color: #168D4D;
+          }
+          .clinic-subtitle {
+            font-size: 9px;
+            color: #666;
+          }
+          .date-box { 
+            border: 1px solid #168D4D; 
+            background: #f0fdf4;
+            padding: 4px 8px; 
+            text-align: center;
+            font-size: 9px;
+          }
+          .title { 
+            text-align: center; 
+            font-size: 13px; 
+            font-weight: bold; 
+            margin: 8px 0;
+            text-transform: uppercase;
+            border-bottom: 1px solid #168D4D;
+            padding-bottom: 4px;
+            color: #168D4D;
+          }
+          .patient-info {
+            border: 1px solid #168D4D;
+            background: #f9fdfb;
+            padding: 8px;
+            margin-bottom: 12px;
+          }
+          .patient-info h3 {
+            margin: 0 0 6px 0;
+            font-size: 11px;
+            font-weight: bold;
+            color: #166534;
+          }
+          .info-grid { 
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 4px;
+          }
+          .form-field { 
+            font-size: 9px;
+          }
+          .sessions-section {
+            margin: 12px 0 8px 0;
+          }
+          .sessions-title {
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+          }
+          .sessions-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 6px 0;
+            font-size: 8px;
+            border: 1px solid #168D4D;
+          }
+          .sessions-table th { 
+            background: #f0fdf4;
+            border: 1px solid #168D4D;
+            padding: 3px 2px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 7px;
+            text-transform: uppercase;
+            color: #166534;
+          }
+          .sessions-table td { 
+            border: 1px solid #168D4D;
+            padding: 2px;
+            text-align: center;
+            font-size: 7px;
+            height: 14px;
+          }
+          .sessions-table .session-num {
+            width: 45px;
+          }
+          .sessions-table .day, .sessions-table .month {
+            width: 22px;
+          }
+          .sessions-table .year {
+            width: 32px;
+          }
+          .sessions-table .tech {
+            width: 90px;
+            text-align: left;
+            padding-left: 3px;
+          }
+          .sessions-table .time {
+            width: 35px;
+          }
+          .bottom-section {
+            display: flex;
+            gap: 8px;
+            margin: 8px 0;
+          }
+          .notes { 
+            flex: 1;
+            border: 1px solid #168D4D;
+            padding: 6px;
+            background: #f9fdfb;
+          }
+          .notes h4 {
+            margin: 0 0 4px 0;
+            font-size: 9px;
+            font-weight: bold;
+            color: #166534;
+          }
+          .notes p {
+            margin: 2px 0;
+            font-size: 7px;
+            line-height: 1.1;
+          }
+          .additional-indications {
+            flex: 1;
+            border: 1px solid #168D4D;
+            padding: 6px;
+            background: #f9fdfb;
+          }
+          .additional-indications h4 {
+            margin: 0 0 4px 0;
+            font-size: 9px;
+            font-weight: bold;
+            color: #166534;
+          }
+          .additional-indications p {
+            font-size: 7px;
+            margin: 0;
+            line-height: 1.2;
+          }
+          .phone-lines { 
+            border: 1px solid #168D4D;
+            background: #f0fdf4;
+            text-align: center; 
+            padding: 4px;
+            font-weight: bold;
+            margin: 6px 0;
+            font-size: 8px;
+            color: #166534;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 6px;
+            padding-top: 4px;
+            border-top: 1px solid #168D4D;
+            font-size: 7px;
+            color: #166534;
           }
         </style>
       </head>
       <body>
         <div class="header">
-          <div style="display: flex; align-items: center;">
+          <div class="logo-section">
             <img src="logo-oftalmolaser-color.png" alt="Oftalmo Laser de Monterrey" class="logo" />
+            <div class="clinic-info">
+              <div class="clinic-name">OFTALMO LASER DE MONTERREY</div>
+              <div class="clinic-subtitle">Centro Especializado en Oftalmología</div>
+            </div>
           </div>
           <div class="date-box">
-            <div style="font-size: 12px;">FECHA</div>
-            <div style="font-size: 16px;">${currentDate}</div>
+            <div style="font-weight: bold;">FECHA</div>
+            <div>${currentDate}</div>
           </div>
         </div>
 
-        <div class="title">TRATAMIENTO DE FOTOBIOMODULACIÓN CON VALEDA</div>
+        <div class="title">Tratamiento de Fotobiomodulación con Valeda</div>
 
-        <div class="form-section">
-          <div class="form-row">
-            <div class="form-field"><strong>Nombre del Paciente:</strong> ${treatment.patient.name}</div>
-          </div>
-          <div class="form-row">
-            <div class="form-field"><strong>Fecha de Nacimiento:</strong> ${formatDate(treatment.patient.birthDate)}</div>
+        <div class="patient-info">
+          <h3>Información del Paciente</h3>
+          <div class="info-grid">
+            <div class="form-field"><strong>Paciente:</strong> ${treatment.patient.name}</div>
             <div class="form-field"><strong>Edad:</strong> ${treatment.patient.age} años</div>
+            <div class="form-field"><strong>Nacimiento:</strong> ${formatDate(treatment.patient.birthDate)}</div>
+            <div class="form-field"><strong>Tratamiento:</strong> ${getTreatmentTypeLabel(treatment.treatmentType)}</div>
           </div>
-          <div class="form-row">
-            <div class="form-field"><strong>Nombre del Médico:</strong> ${treatment.doctor.name}</div>
+          <div class="form-field"><strong>Médico:</strong> ${treatment.doctor.name}</div>
+        </div>
+
+        <div class="sessions-section">
+          <div class="sessions-title">Calendario de Sesiones</div>
+          <table class="sessions-table">
+            <thead>
+              <tr>
+                <th class="session-num">Sesión</th>
+                <th class="day">D</th>
+                <th class="month">M</th>
+                <th class="year">A</th>
+                <th class="tech">Técnico</th>
+                <th class="time">Hora</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${treatment.sessions.map(session => {
+                const date = session.date ? new Date(session.date) : null;
+                const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                return `
+                  <tr>
+                    <td class="session-num">${session.sessionNumber}</td>
+                    <td class="day">${date ? date.getDate().toString().padStart(2, '0') : ''}</td>
+                    <td class="month">${date ? months[date.getMonth()] : ''}</td>
+                    <td class="year">${date ? date.getFullYear() : ''}</td>
+                    <td class="tech">${session.technician || ''}</td>
+                    <td class="time">${session.time || ''}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="bottom-section">
+          <div class="notes">
+            <h4>INSTRUCCIONES</h4>
+            <p><strong>Frecuencia:</strong> Cada 3 días (Ej: L-Mi-V)</p>
+            <p><strong>Inasistencia:</strong> Reportar inmediatamente</p>
+            <p><strong>Continuidad:</strong> Mantener regularidad</p>
           </div>
-          <div class="form-row">
-            <div class="form-field"><strong>Tx Valeda:</strong> ${getTreatmentTypeLabel(treatment.treatmentType)}</div>
+          
+          <div class="additional-indications">
+            <h4>INDICACIONES MÉDICAS</h4>
+            <p>${treatment.additionalIndications || 'Espacio para observaciones del médico'}</p>
           </div>
         </div>
 
-        <h3 style="text-align: center; margin: 20px 0;">FECHAS DE SESIONES DEL TRATAMIENTO</h3>
+        <div class="phone-lines">
+          Teléfonos: 818318-6858 | 818318-6816 | 818318-6852 | 818318-6853 | 814444-2090
+        </div>
         
-        <table class="sessions-table">
-          <thead>
-            <tr>
-              <th>Sesión</th>
-              <th>D</th>
-              <th>M</th>
-              <th>A</th>
-              <th>Técnico</th>
-              <th>Hora</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${treatment.sessions.map(session => {
-              const date = session.date ? new Date(session.date) : null;
-              const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-              return `
-                <tr>
-                  <td>Sesión ${session.sessionNumber}</td>
-                  <td>${date ? date.getDate().toString().padStart(2, '0') : ''}</td>
-                  <td>${date ? months[date.getMonth()] : ''}</td>
-                  <td>${date ? date.getFullYear() : ''}</td>
-                  <td>${session.technician || ''}</td>
-                  <td>${session.time || ''}</td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
-
-        <div class="notes">
-          <h4>NOTAS IMPORTANTES</h4>
-          <p>El Tratamiento deberá de realizarse cada tres días (ej) Lunes, Miércoles y Viernes o Martes, Jueves y Sábados</p>
-          <p>Si no acude a alguna de sus citas favor de reportarse a la brevedad a Oftalmo Laser de Monterrey para reagendar el resto de sus sesiones</p>
-        </div>
-
-        ${treatment.additionalIndications ? `
-          <div class="form-section">
-            <h4>INDICACIONES ADICIONALES</h4>
-            <p>${treatment.additionalIndications}</p>
-          </div>
-        ` : ''}
-
-        <div class="phone-lines" style="margin-top: 30px;">
-          818318-6858 | 818318-6816 | 818318-6852 | 818318-6853 | 814444-2090
+        <div class="footer">
+          <p>© ${new Date().getFullYear()} Oftalmo Laser de Monterrey • Sistema Valeda</p>
         </div>
 
         <script>

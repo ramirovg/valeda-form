@@ -1,30 +1,101 @@
-<div class="min-h-screen bg-gray-50 py-4">
-  <div class="max-w-6xl mx-auto px-4">
-    <!-- Application Header -->
-    <div class="text-center mb-6">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ title }}</h1>
-      <p class="text-lg text-gray-600">Sistema de Tratamiento de Fotobiomodulación con Valeda</p>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-green-50">
+  <!-- Header with Logo -->
+  <header class="bg-white shadow-lg border-b-4 border-green-600">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between py-4">
+        <div class="flex items-center space-x-4">
+          <img src="logo-oftalmolaser-color.png" alt="Oftalmo Laser de Monterrey" class="h-12 w-auto" />
+          <div class="border-l-2 border-green-600 pl-4">
+            <h1 class="text-2xl font-bold text-gray-900">{{ title }}</h1>
+            <p class="text-sm text-green-700">Sistema de Tratamiento de Fotobiomodulación</p>
+          </div>
+        </div>
+        <div class="hidden md:flex items-center space-x-2">
+          <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+          <span class="text-sm text-gray-600">Sistema Activo</span>
+        </div>
+      </div>
     </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="mb-6">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 px-4 py-3">
+        <div class="flex items-center space-x-2 text-sm">
+          <span class="text-green-600 font-medium">Inicio</span>
+          @if (currentView === 'form') {
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+            <span class="text-gray-600">
+              @if (selectedTreatment) {
+                Editar Tratamiento
+              } @else {
+                Nuevo Tratamiento
+              }
+            </span>
+          }
+        </div>
+      </div>
+    </nav>
 
     <!-- Search View -->
     @if (currentView === 'search') {
-      <app-patient-search
-        (treatmentSelected)="onTreatmentSelected($event)"
-        (createNewTreatment)="onCreateNewTreatment()"
-        (printRequested)="onPrintTreatment($event)"
-      ></app-patient-search>
+      <div class="bg-white rounded-xl shadow-lg border border-gray-200">
+        <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-t-xl px-6 py-4">
+          <h2 class="text-xl font-semibold text-white">Gestión de Tratamientos Valeda</h2>
+          <p class="text-green-100 text-sm mt-1">Buscar y administrar tratamientos de fotobiomodulación</p>
+        </div>
+        <div class="p-6">
+          <app-patient-search
+            (treatmentSelected)="onTreatmentSelected($event)"
+            (createNewTreatment)="onCreateNewTreatment()"
+            (printRequested)="onPrintTreatment($event)"
+          ></app-patient-search>
+        </div>
+      </div>
     }
 
     <!-- Form View -->
     @if (currentView === 'form') {
-      <app-valeda-form
-        [treatment]="selectedTreatment"
-        (saved)="onTreatmentSaved($event)"
-        (cancelled)="onFormCancelled()"
-        (printRequested)="onPrintTreatment($event)"
-      ></app-valeda-form>
+      <div class="bg-white rounded-xl shadow-lg border border-gray-200">
+        <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-t-xl px-6 py-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-semibold text-white">
+                @if (selectedTreatment) {
+                  Editar Tratamiento Valeda
+                } @else {
+                  Nuevo Tratamiento Valeda
+                }
+              </h2>
+              <p class="text-green-100 text-sm mt-1">Formulario de tratamiento de fotobiomodulación</p>
+            </div>
+            <button
+              (click)="onFormCancelled()"
+              class="text-white hover:text-green-200 transition-colors duration-200"
+              title="Volver a búsqueda"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="p-6">
+          <app-valeda-form
+            [treatment]="selectedTreatment"
+            (saved)="onTreatmentSaved($event)"
+            (cancelled)="onFormCancelled()"
+            (printRequested)="onPrintTreatment($event)"
+          ></app-valeda-form>
+        </div>
+      </div>
     }
-  </div>
+  </main>
 </div>
 
 <router-outlet />
