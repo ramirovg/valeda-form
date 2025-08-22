@@ -140,10 +140,10 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
 
     if (session.day && session.month && session.year && session.month >= 1 && session.month <= 12) {
       // Convert from user input (1-12) to JavaScript Date month (0-11)
-      session.fecha = new Date(session.year, session.month - 1, session.day);
-      console.log(`✅ Session ${index + 1} date created:`, session.fecha);
+      session.date = new Date(session.year, session.month - 1, session.day);
+      console.log(`✅ Session ${index + 1} date created:`, session.date);
     } else {
-      session.fecha = null;
+      session.date = null;
       console.log(`❌ Session ${index + 1} date cleared (incomplete data)`);
     }
     // Trigger debounced auto-save when dates change
@@ -154,9 +154,9 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
     console.log('⏰ Session field changed, current sessions data:',
       this.sessions.map(s => ({
         session: s.sessionNumber,
-        tecnico: s.tecnico,
-        hora: s.hora,
-        hasDate: !!s.fecha
+        technician: s.technician,
+        time: s.time,
+        hasDate: !!s.date
       }))
     );
     // Trigger debounced auto-save
@@ -171,30 +171,30 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
 
       const sessionData = this.sessions.map(session => ({
         sessionNumber: session.sessionNumber,
-        fecha: session.fecha,
-        tecnico: session.tecnico || '',
-        hora: session.hora || ''
+        date: session.date,
+        technician: session.technician || '',
+        time: session.time || ''
       }));
 
       console.log('💾 Auto-saving treatment data:', {
         treatmentId: this.treatment.id,
         patientName: formData.patientName,
-        sessionsWithData: sessionData.filter(s => s.tecnico || s.hora || s.fecha).length,
+        sessionsWithData: sessionData.filter(s => s.technician || s.time || s.date).length,
         sessionData: sessionData
       });
 
       const treatmentData: Partial<ValedaTreatment> = {
         patient: {
-          nombre: formData.patientName,
-          fechaNacimiento: new Date(formData.birthDate),
-          edad: this.calculatedAge
+          name: formData.patientName,
+          birthDate: new Date(formData.birthDate),
+          age: this.calculatedAge
         },
         doctor: {
-          nombre: formData.doctorName
+          name: formData.doctorName
         },
-        tipoTratamiento: formData.treatmentType,
+        treatmentType: formData.treatmentType,
         sessions: sessionData,
-        indicacionesAdicionales: formData.additionalIndications
+        additionalIndications: formData.additionalIndications
       };
 
       this.valedaService.updateTreatment(this.treatment.id, treatmentData).subscribe({
@@ -218,32 +218,32 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
 
       const sessionData = this.sessions.map(session => ({
         sessionNumber: session.sessionNumber,
-        fecha: session.fecha,
-        tecnico: session.tecnico || '',
-        hora: session.hora || ''
+        date: session.date,
+        technician: session.technician || '',
+        time: session.time || ''
       }));
 
       console.log('📋 Submitting treatment form:', {
         isNewTreatment: !this.treatment?.id,
         patientName: formData.patientName,
         treatmentType: formData.treatmentType,
-        sessionsWithData: sessionData.filter(s => s.tecnico || s.hora || s.fecha).length,
+        sessionsWithData: sessionData.filter(s => s.technician || s.time || s.date).length,
         fullSessionData: sessionData
       });
 
       const treatmentData: Omit<ValedaTreatment, 'id'> = {
         patient: {
-          nombre: formData.patientName,
-          fechaNacimiento: new Date(formData.birthDate),
-          edad: this.calculatedAge
+          name: formData.patientName,
+          birthDate: new Date(formData.birthDate),
+          age: this.calculatedAge
         },
         doctor: {
-          nombre: formData.doctorName
+          name: formData.doctorName
         },
-        fechaCreacion: this.treatment?.fechaCreacion || new Date(),
-        tipoTratamiento: formData.treatmentType,
+        creationDate: this.treatment?.creationDate || new Date(),
+        treatmentType: formData.treatmentType,
         sessions: sessionData,
-        indicacionesAdicionales: formData.additionalIndications
+        additionalIndications: formData.additionalIndications
       };
 
       if (this.treatment?.id) {
@@ -276,22 +276,22 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
     const currentTreatment: ValedaTreatment = this.treatment || {
       id: 'temp',
       patient: {
-        nombre: this.treatmentForm.get('patientName')?.value || '',
-        fechaNacimiento: new Date(this.treatmentForm.get('birthDate')?.value),
-        edad: this.calculatedAge
+        name: this.treatmentForm.get('patientName')?.value || '',
+        birthDate: new Date(this.treatmentForm.get('birthDate')?.value),
+        age: this.calculatedAge
       },
       doctor: {
-        nombre: this.treatmentForm.get('doctorName')?.value || ''
+        name: this.treatmentForm.get('doctorName')?.value || ''
       },
-      fechaCreacion: new Date(),
-      tipoTratamiento: this.treatmentForm.get('treatmentType')?.value,
+      creationDate: new Date(),
+      treatmentType: this.treatmentForm.get('treatmentType')?.value,
       sessions: this.sessions.map(session => ({
         sessionNumber: session.sessionNumber,
-        fecha: session.fecha,
-        tecnico: session.tecnico,
-        hora: session.hora
+        date: session.date,
+        technician: session.technician,
+        time: session.time
       })),
-      indicacionesAdicionales: this.treatmentForm.get('additionalIndications')?.value
+      additionalIndications: this.treatmentForm.get('additionalIndications')?.value
     };
 
     this.printRequested.emit(currentTreatment);

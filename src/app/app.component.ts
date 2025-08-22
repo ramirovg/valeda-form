@@ -66,6 +66,10 @@ export class AppComponent {
 
     const getTreatmentTypeLabel = (type: string) => {
       switch (type) {
+        case 'right-eye': return 'Ojo Derecho';
+        case 'left-eye': return 'Ojo Izquierdo';
+        case 'both-eyes': return 'Ambos Ojos';
+        // Backward compatibility for old Spanish values
         case 'ojo-derecho': return 'Ojo Derecho';
         case 'ojo-izquierdo': return 'Ojo Izquierdo';
         case 'ambos-ojos': return 'Ambos Ojos';
@@ -80,7 +84,7 @@ export class AppComponent {
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Tratamiento Valeda - ${treatment.patient.nombre}</title>
+        <title>Tratamiento Valeda - ${treatment.patient.name}</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 20px; }
           .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -117,17 +121,17 @@ export class AppComponent {
 
         <div class="form-section">
           <div class="form-row">
-            <div class="form-field"><strong>Nombre del Paciente:</strong> ${treatment.patient.nombre}</div>
+            <div class="form-field"><strong>Nombre del Paciente:</strong> ${treatment.patient.name}</div>
           </div>
           <div class="form-row">
-            <div class="form-field"><strong>Fecha de Nacimiento:</strong> ${formatDate(treatment.patient.fechaNacimiento)}</div>
-            <div class="form-field"><strong>Edad:</strong> ${treatment.patient.edad} años</div>
+            <div class="form-field"><strong>Fecha de Nacimiento:</strong> ${formatDate(treatment.patient.birthDate)}</div>
+            <div class="form-field"><strong>Edad:</strong> ${treatment.patient.age} años</div>
           </div>
           <div class="form-row">
-            <div class="form-field"><strong>Nombre del Médico:</strong> ${treatment.doctor.nombre}</div>
+            <div class="form-field"><strong>Nombre del Médico:</strong> ${treatment.doctor.name}</div>
           </div>
           <div class="form-row">
-            <div class="form-field"><strong>Tx Valeda:</strong> ${getTreatmentTypeLabel(treatment.tipoTratamiento)}</div>
+            <div class="form-field"><strong>Tx Valeda:</strong> ${getTreatmentTypeLabel(treatment.treatmentType)}</div>
           </div>
         </div>
 
@@ -146,7 +150,7 @@ export class AppComponent {
           </thead>
           <tbody>
             ${treatment.sessions.map(session => {
-              const date = session.fecha ? new Date(session.fecha) : null;
+              const date = session.date ? new Date(session.date) : null;
               const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
               return `
                 <tr>
@@ -154,8 +158,8 @@ export class AppComponent {
                   <td>${date ? date.getDate().toString().padStart(2, '0') : ''}</td>
                   <td>${date ? months[date.getMonth()] : ''}</td>
                   <td>${date ? date.getFullYear() : ''}</td>
-                  <td>${session.tecnico || ''}</td>
-                  <td>${session.hora || ''}</td>
+                  <td>${session.technician || ''}</td>
+                  <td>${session.time || ''}</td>
                 </tr>
               `;
             }).join('')}
@@ -168,10 +172,10 @@ export class AppComponent {
           <p>Si no acude a alguna de sus citas favor de reportarse a la brevedad a Oftalmo Laser de Monterrey para reagendar el resto de sus sesiones</p>
         </div>
 
-        ${treatment.indicacionesAdicionales ? `
+        ${treatment.additionalIndications ? `
           <div class="form-section">
             <h4>INDICACIONES ADICIONALES</h4>
-            <p>${treatment.indicacionesAdicionales}</p>
+            <p>${treatment.additionalIndications}</p>
           </div>
         ` : ''}
 
