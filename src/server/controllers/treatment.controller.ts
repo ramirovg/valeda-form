@@ -4,10 +4,13 @@ import { ITreatment } from '../models/treatment.model';
 
 export class TreatmentController {
   /**
-   * GET /api/treatments - Get all treatments
+   * GET /api/treatments - Get all treatments (with optional search filters)
    */
   static async getAllTreatments(req: Request, res: Response): Promise<void> {
     try {
+      // Check if any search filters are present
+      const hasSearchFilters = req.query['name'] || req.query['doctor'] || req.query['treatmentType'] || req.query['dateFrom'] || req.query['dateTo'];
+
       const paginationOptions: PaginationOptions = {
         page: parseInt(req.query['page'] as string) || 1,
         limit: parseInt(req.query['limit'] as string) || 50,
@@ -15,7 +18,39 @@ export class TreatmentController {
         sortOrder: (req.query['sortOrder'] as 'asc' | 'desc') || 'desc'
       };
 
-      const result = await TreatmentService.getAllTreatments(paginationOptions);
+      let result;
+
+      if (hasSearchFilters) {
+        // Use search functionality if filters are present
+        const searchFilters: SearchFilters = {
+          name: req.query['name'] as string,
+          doctor: req.query['doctor'] as string,
+          treatmentType: req.query['treatmentType'] as string,
+          dateFrom: req.query['dateFrom'] ? new Date(req.query['dateFrom'] as string) : undefined,
+          dateTo: req.query['dateTo'] ? new Date(req.query['dateTo'] as string) : undefined
+        };
+
+        // Remove undefined values
+        Object.keys(searchFilters).forEach(key => {
+          if (searchFilters[key as keyof SearchFilters] === undefined) {
+            delete searchFilters[key as keyof SearchFilters];
+          }
+        });
+
+        console.log('🔍 Searching treatments with filters:', searchFilters);
+        result = await TreatmentService.searchTreatments(searchFilters, paginationOptions);
+      } else {
+        // Return all treatments if no filters
+        result = await TreatmentService.getAllTreatments(paginationOptions);
+      }
+
+      // Disable caching for search results to prevent 304 responses
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+
       res.json(result);
     } catch (error) {
       console.error('Error getting treatments:', error);
