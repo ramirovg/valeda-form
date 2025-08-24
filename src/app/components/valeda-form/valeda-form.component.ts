@@ -90,7 +90,11 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
 
     this.treatmentForm.patchValue({
       patientName: this.treatment.patient.name,
-      birthDate: this.treatment.patient.birthDate.toISOString().split('T')[0],
+      birthDate: this.treatment.patient.birthDate instanceof Date 
+        ? this.treatment.patient.birthDate.toISOString().split('T')[0]
+        : this.treatment.patient.birthDate 
+          ? new Date(this.treatment.patient.birthDate).toISOString().split('T')[0]
+          : '',
       doctorName: this.treatment.doctor.name,
       treatmentType: this.treatment.treatmentType,
       additionalIndications: this.treatment.additionalIndications || ''
@@ -102,11 +106,12 @@ export class ValedaFormComponent implements OnInit, OnDestroy {
     this.treatment.sessions.forEach((session, index) => {
       if (session.date) {
         const date = new Date(session.date);
+        const isValidDate = date && !isNaN(date.getTime());
         this.sessions[index] = {
           ...this.sessions[index],
-          day: date.getDate(),
-          month: date.getMonth() + 1, // Convert from JS month (0-11) to user month (1-12)
-          year: date.getFullYear(),
+          day: isValidDate ? date.getDate() : 0,
+          month: isValidDate ? date.getMonth() + 1 : 0, // Convert from JS month (0-11) to user month (1-12)
+          year: isValidDate ? date.getFullYear() : 0,
           technician: session.technician || '',
           time: session.time || '',
           date: session.date

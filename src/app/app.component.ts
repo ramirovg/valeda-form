@@ -58,10 +58,26 @@ export class AppComponent {
   }
 
   private generatePrintHTML(treatment: ValedaTreatment): string {
-    const formatDate = (date: Date) => {
+    const formatDate = (date: Date | string | null | undefined) => {
       if (!date) return '';
+      
+      // Ensure we have a valid Date object
+      let dateObj: Date;
+      if (date instanceof Date) {
+        dateObj = date;
+      } else if (typeof date === 'string') {
+        dateObj = new Date(date);
+      } else {
+        return '';
+      }
+      
+      // Check if the date is valid
+      if (isNaN(dateObj.getTime())) {
+        return '';
+      }
+      
       const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-      return `${date.getDate().toString().padStart(2, '0')}/${months[date.getMonth()]}/${date.getFullYear()}`;
+      return `${dateObj.getDate().toString().padStart(2, '0')}/${months[dateObj.getMonth()]}/${dateObj.getFullYear()}`;
     };
 
     const getTreatmentTypeLabel = (type: string) => {
@@ -320,13 +336,14 @@ export class AppComponent {
             <tbody>
               ${treatment.sessions.map(session => {
                 const date = session.date ? new Date(session.date) : null;
+                const isValidDate = date && !isNaN(date.getTime());
                 const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
                 return `
                   <tr>
                     <td class="session-num">${session.sessionNumber}</td>
-                    <td class="day">${date ? date.getDate().toString().padStart(2, '0') : ''}</td>
-                    <td class="month">${date ? months[date.getMonth()] : ''}</td>
-                    <td class="year">${date ? date.getFullYear() : ''}</td>
+                    <td class="day">${isValidDate ? date!.getDate().toString().padStart(2, '0') : ''}</td>
+                    <td class="month">${isValidDate ? months[date!.getMonth()] : ''}</td>
+                    <td class="year">${isValidDate ? date!.getFullYear() : ''}</td>
                     <td class="tech">${session.technician || ''}</td>
                     <td class="time">${session.time || ''}</td>
                   </tr>

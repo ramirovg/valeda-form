@@ -9,11 +9,47 @@ This is an Angular 20 application called "valeda-form" with Server-Side Renderin
 ## Development Commands
 
 ### Essential Commands
-- `npm start` or `ng serve` - Start development server at http://localhost:4200/
+- `npm start` or `ng serve` - Start Angular development server at http://localhost:4200/
 - `ng build` - Build the project for production (outputs to `dist/`)
 - `ng build --watch --configuration development` - Build in watch mode for development
 - `ng test` - Run unit tests via Karma
 - `npm run serve:ssr:valeda-form` - Serve the SSR version using Express server
+
+### MongoDB Development Commands
+- `npm run build:server` - Compile server TypeScript modules to JavaScript
+- `npm run dev:api` - Start development API server on http://localhost:3001
+- `npm run dev:full` - Start both Angular and API servers concurrently
+
+### MongoDB Setup
+The application uses MongoDB with Mongoose ODM for data persistence. The modular server architecture includes:
+
+#### Database Configuration
+- **Default URI**: `mongodb://localhost:27017/valeda-treatments`
+- **Environment Variable**: Set `MONGODB_URI` to override default connection
+- **Auto-connection**: API server automatically connects to MongoDB on startup
+- **Graceful shutdown**: Database connection is properly closed on server shutdown
+
+#### Development Workflow
+1. **Start MongoDB**: Ensure MongoDB is running locally on port 27017
+2. **Build Server**: Run `npm run build:server` to compile TypeScript modules
+3. **Start API Server**: Run `npm run dev:api` to start the API on port 3001
+4. **Start Angular**: Run `npm start` to start Angular on port 4200
+5. **Full Development**: Run `npm run dev:full` to start both servers simultaneously
+
+#### API Endpoints
+- `GET /api/treatments` - List treatments with pagination
+- `POST /api/treatments` - Create new treatment
+- `GET /api/treatments/:id` - Get specific treatment
+- `PUT /api/treatments/:id` - Update treatment
+- `DELETE /api/treatments/:id` - Delete treatment
+- `GET /api/doctors/sample` - Get sample doctors
+- `GET /health` - API health check
+
+#### Data Models
+- **Treatment**: Patient info, doctor, sessions, treatment type
+- **Doctor**: Name, specialization, creation date
+- **Patient**: Name, age, birth date, gender, contact info
+- **Session**: Session number, date, eye treated, parameters
 
 ### Code Generation
 - `ng generate component component-name` - Generate new component
@@ -25,9 +61,20 @@ This is an Angular 20 application called "valeda-form" with Server-Side Renderin
 - **Standalone Components**: Uses Angular 20's standalone component architecture
 - **SSR Enabled**: Full server-side rendering with hydration support
 - **Express Server**: Custom Express server (`server.ts`) for SSR serving
+- **MongoDB Integration**: Modular server architecture with Mongoose ODM
 - **Routing**: Angular Router with empty routes configuration (ready for expansion)
 - **UI Framework**: TailwindCSS v3.4.17 for utility-first CSS
 - **Component Library**: Flowbite v3.1.2 for pre-built UI components
+
+### MongoDB Architecture
+The server is organized into modular components for maintainability:
+
+- **Models** (`src/server/models/`): Mongoose schemas and data models
+- **Controllers** (`src/server/controllers/`): Request handlers and business logic
+- **Services** (`src/server/services/`): Database operations and business services
+- **Routes** (`src/server/routes/`): API route definitions
+- **Middleware** (`src/server/middleware/`): Validation, logging, and error handling
+- **Config** (`src/server/config/`): Database configuration and connection management
 
 ### Key Configuration Files
 - `angular.json`: Angular CLI workspace configuration with SSR setup

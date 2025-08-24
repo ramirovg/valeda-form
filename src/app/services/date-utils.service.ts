@@ -15,12 +15,27 @@ export class DateUtilsService {
    * Formats a date to dd/mmm/yyyy format in Spanish
    * Example: 15/ene/2024
    */
-  formatToSpanishDate(date: Date): string {
+  formatToSpanishDate(date: Date | string | null | undefined): string {
     if (!date) return '';
     
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = this.spanishMonths[date.getMonth()];
-    const year = date.getFullYear();
+    // Ensure we have a valid Date object
+    let dateObj: Date;
+    if (date instanceof Date) {
+      dateObj = date;
+    } else if (typeof date === 'string') {
+      dateObj = new Date(date);
+    } else {
+      return '';
+    }
+    
+    // Check if the date is valid
+    if (isNaN(dateObj.getTime())) {
+      return '';
+    }
+    
+    const day = dateObj.getDate().toString().padStart(2, '0');
+    const month = this.spanishMonths[dateObj.getMonth()];
+    const year = dateObj.getFullYear();
     
     return `${day}/${month}/${year}`;
   }

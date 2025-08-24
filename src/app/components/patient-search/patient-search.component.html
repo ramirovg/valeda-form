@@ -108,7 +108,7 @@ Nuevo Paciente
     </div>
 
     <div class="max-h-96 overflow-y-auto">
-          @for (treatment of searchResults; track trackByTreatment(0, treatment)) {
+          @for (treatment of searchResults; track trackByTreatment($index, treatment)) {
             <div
               class="px-6 py-4 border-b border-gray-100 hover:bg-green-50 cursor-pointer transition-colors duration-200"
               (click)="selectTreatment(treatment)"
