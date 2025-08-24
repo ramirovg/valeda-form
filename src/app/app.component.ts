@@ -14,7 +14,7 @@ type ViewMode = 'search' | 'form';
     styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'Valeda Form';
+  title = 'Sistema de Tratamiento de Fotobiomodulación';
   currentView: ViewMode = 'search';
   selectedTreatment?: ValedaTreatment;
 
@@ -295,9 +295,9 @@ export class AppComponent {
       <body>
         <div class="header">
           <div class="logo-section">
-            <img src="logo-oftalmolaser-color.png" alt="Oftalmo Laser de Monterrey" class="logo" />
+            <img src="logo-oftalmolaser-color.png" alt="Oftalmolaser de Monterrey" class="logo" />
             <div class="clinic-info">
-              <div class="clinic-name">OFTALMO LASER DE MONTERREY</div>
+              <div class="clinic-name">OFTALMOLASER DE MONTERREY</div>
               <div class="clinic-subtitle">Centro Especializado en Oftalmología</div>
             </div>
           </div>
@@ -372,7 +372,7 @@ export class AppComponent {
         </div>
         
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Oftalmo Laser de Monterrey • Sistema Valeda</p>
+          <p>© ${new Date().getFullYear()} Oftalmolaser de Monterrey • Sistema Valeda</p>
         </div>
 
         <script>

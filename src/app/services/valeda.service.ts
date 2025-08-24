@@ -48,7 +48,7 @@ export class ValedaService {
   }
 
   /**
-   * Search treatments by filters
+   * Search treatments by filters (Backend filtering - scalable for large datasets)
    */
   searchTreatments(filters: SearchFilters): Observable<ValedaTreatment[]> {
     let params = new HttpParams();
@@ -75,6 +75,59 @@ export class ValedaService {
       catchError(error => {
         console.error('Error searching treatments:', error);
         return of([]);
+      })
+    );
+  }
+
+  /**
+   * Search treatments by filters (Frontend filtering - instant results for small datasets)
+   */
+  searchTreatmentsFrontend(filters: SearchFilters): Observable<ValedaTreatment[]> {
+    return this.treatmentsSubject.pipe(
+      map(allTreatments => {
+        if (!filters || (!filters.name && !filters.doctor && !filters.dateFrom && !filters.dateTo)) {
+          return allTreatments;
+        }
+
+        return allTreatments.filter(treatment => {
+          // Name filtering (case-insensitive partial match)
+          if (filters.name) {
+            const searchName = filters.name.toLowerCase().trim();
+            const patientName = treatment.patient.name.toLowerCase();
+            if (!patientName.includes(searchName)) {
+              return false;
+            }
+          }
+          
+          // Doctor filtering (case-insensitive partial match)
+          if (filters.doctor) {
+            const searchDoctor = filters.doctor.toLowerCase().trim();
+            const doctorName = treatment.doctor.name.toLowerCase();
+            if (!doctorName.includes(searchDoctor)) {
+              return false;
+            }
+          }
+          
+          // Date range filtering
+          if (filters.dateFrom) {
+            const treatmentDate = new Date(treatment.creationDate);
+            if (treatmentDate < filters.dateFrom) {
+              return false;
+            }
+          }
+          
+          if (filters.dateTo) {
+            const treatmentDate = new Date(treatment.creationDate);
+            // Set end of day for dateTo comparison
+            const endOfDay = new Date(filters.dateTo);
+            endOfDay.setHours(23, 59, 59, 999);
+            if (treatmentDate > endOfDay) {
+              return false;
+            }
+          }
+          
+          return true;
+        });
       })
     );
   }
@@ -185,6 +238,27 @@ export class ValedaService {
         ];
         return of(sampleDoctors);
       })
+    );
+  }
+
+  /**
+   * Get unique patient names for autocomplete
+   */
+  getPatientNames(): Observable<string[]> {
+    return this.getTreatments().pipe(
+      map(treatments => {
+        const names = treatments.map(t => t.patient.name);
+        return [...new Set(names)].sort(); // Remove duplicates and sort
+      })
+    );
+  }
+
+  /**
+   * Get doctor names for autocomplete
+   */
+  getDoctorNames(): Observable<string[]> {
+    return this.getSampleDoctors().pipe(
+      map(doctors => doctors.map(d => d.name).sort())
     );
   }
 
