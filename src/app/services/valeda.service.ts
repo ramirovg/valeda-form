@@ -37,9 +37,17 @@ export class ValedaService {
     if (this.isBrowser) {
       const isDev = window.location.hostname === 'localhost' &&
                    (window.location.port === '4200' || window.location.port === '4201');
-      return isDev ? 'http://localhost:3001/api' : '/api';
+      
+      if (isDev) {
+        return 'http://localhost:3001/api';
+      }
+      
+      // Production: check if we're in /valeda/ subfolder
+      const isValedaPath = window.location.pathname.startsWith('/valeda');
+      return isValedaPath ? '/valeda/api' : '/api';
     }
-    // Default for server-side rendering
+    
+    // For SSR, use development API URL
     return 'http://localhost:3001/api';
   }
 

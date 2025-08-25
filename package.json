@@ -10,7 +10,13 @@
     "serve:ssr:valeda-form": "node dist/valeda-form/server/server.mjs",
     "build:server": "tsc --project tsconfig.server.json --outDir dist/valeda-form/server",
     "dev:api": "npm run build:server && node server-dev.js",
-    "dev:full": "concurrently \"npm run start\" \"npm run dev:api\""
+    "dev:full": "concurrently \"npm run start\" \"npm run dev:api\"",
+    "build:production": "npm run build:server && ng build --configuration production",
+    "build:production:full": "npm run build:production && npm run copy:server-files",
+    "copy:server-files": "cp server-production.js dist/valeda-form/ && cp -r src/server/config dist/valeda-form/server/ || echo 'Manual copy required'",
+    "start:production": "NODE_ENV=production node dist/valeda-form/server-production.js",
+    "deploy:build": "npm run build:production:full && npm run create:deployment-package",
+    "create:deployment-package": "tar -czf valeda-form-deployment.tar.gz dist/ package.json package-lock.json"
   },
   "private": true,
   "dependencies": {

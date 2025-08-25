@@ -101,9 +101,106 @@
 - MongoDB integration handles both `_id` and `id` fields properly
 - Form validation and auto-save features are operational
 
-## 🚦 **Next Steps**
-1. Configure Angular build for subfolder deployment
-2. Set up production environment variables
-3. Create production server scripts
-4. Configure Nginx reverse proxy
-5. Deploy and test in production environment
+## 🚀 **Deployment Instructions**
+
+### **Quick Start (Windows)**
+```bash
+# Build and create deployment package
+deploy.bat
+
+# Upload 'deployment' directory to server
+scp -r deployment/ root@your-server:/var/www/oftalmonet.mx/valeda/
+```
+
+### **Detailed Server Setup**
+
+#### **1. Server Preparation**
+```bash
+# On DigitalOcean server
+sudo mkdir -p /var/www/oftalmonet.mx/valeda
+sudo mkdir -p /var/log/pm2
+sudo chown -R www-data:www-data /var/www/oftalmonet.mx/valeda
+
+# Install Node.js and PM2 (if not already installed)
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+sudo npm install -g pm2
+
+# Install MongoDB (if not already installed)
+# Follow MongoDB installation guide for Ubuntu/Debian
+```
+
+#### **2. Deploy Application**
+```bash
+# Upload and extract deployment package
+cd /var/www/oftalmonet.mx/valeda/
+sudo tar -xzf valeda-form-deployment.tar.gz
+
+# Install dependencies
+sudo -u www-data npm install --only=prod
+
+# Set up environment variables
+sudo cp .env.template .env
+sudo nano .env  # Edit with your production values
+
+# Start with PM2
+sudo -u www-data pm2 start ecosystem.config.js --env production
+sudo -u www-data pm2 save
+sudo pm2 startup
+```
+
+#### **3. Configure Nginx**
+```bash
+# Copy Nginx configuration
+sudo cp nginx/valeda.conf /etc/nginx/sites-available/
+sudo ln -s /etc/nginx/sites-available/valeda.conf /etc/nginx/sites-enabled/
+
+# Test and reload Nginx
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+#### **4. Verify Deployment**
+- API Health: `http://your-server:3001/health`
+- Application: `https://oftalmonet.mx/valeda/`
+- PM2 Status: `pm2 list`
+- Logs: `pm2 logs valeda-form-api`
+
+### **Environment Variables**
+Copy `.env.template` to `.env` and configure:
+```env
+NODE_ENV=production
+PORT=3001
+MONGODB_URI=mongodb://localhost:27017/valeda-treatments-prod
+DOMAIN=oftalmonet.mx
+```
+
+### **Monitoring & Maintenance**
+```bash
+# View logs
+pm2 logs valeda-form-api
+
+# Restart application
+pm2 restart valeda-form-api
+
+# Monitor resources
+pm2 monit
+
+# Update application
+./deploy.sh production
+```
+
+## 🔧 **Troubleshooting**
+
+### **Common Issues**
+1. **Port 3001 in use**: Change PORT in .env file
+2. **MongoDB connection failed**: Check MONGODB_URI and service status
+3. **Nginx 404**: Verify file paths and permissions
+4. **PM2 not starting**: Check logs and file permissions
+
+### **File Permissions**
+```bash
+sudo chown -R www-data:www-data /var/www/oftalmonet.mx/valeda
+sudo chmod -R 755 /var/www/oftalmonet.mx/valeda
+sudo chmod +x /var/www/oftalmonet.mx/valeda/server-production.js
+```
