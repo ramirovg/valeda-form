@@ -25,7 +25,7 @@ export function app(): Express {
   // Middleware
   server.use(express.json({ limit: '10mb' }));
   server.use(express.urlencoded({ extended: true }));
-  
+
   // Development logging
   if (process.env['NODE_ENV'] !== 'production') {
     server.use(requestLogger);
@@ -41,7 +41,7 @@ export function app(): Express {
   server.use('/api', apiRoutes);
 
   // Legacy compatibility - redirect old endpoints
-  server.get('/api/doctors', (req, res, next) => {
+  server.get('/api/doctors', (_req, _res, next) => {
     // This is now handled by the modular routes
     next();
   });
@@ -79,7 +79,7 @@ function run(): void {
 
   // Start up the Node server
   const server = app();
-  
+
   server.listen(port, () => {
     console.log(`
 🚀 Server started successfully!
@@ -100,7 +100,7 @@ function run(): void {
   // Graceful shutdown
   const gracefulShutdown = async (signal: string) => {
     console.log(`\n🛑 Received ${signal}, shutting down gracefully...`);
-    
+
     try {
       await databaseService.disconnect();
       console.log('✅ Database disconnected');

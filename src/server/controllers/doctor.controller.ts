@@ -5,7 +5,7 @@ export class DoctorController {
   /**
    * GET /api/doctors - Get all active doctors
    */
-  static async getAllDoctors(req: Request, res: Response): Promise<void> {
+  static async getAllDoctors(_req: Request, res: Response): Promise<void> {
     try {
       const doctors = await Doctor.find({ isActive: true })
         .sort({ name: 1 })
@@ -24,7 +24,7 @@ export class DoctorController {
   /**
    * GET /api/doctors/sample - Get or create sample doctors
    */
-  static async getSampleDoctors(req: Request, res: Response): Promise<void> {
+  static async getSampleDoctors(_req: Request, res: Response): Promise<void> {
     try {
       // This will create sample doctors if they don't exist
       const doctors = await (Doctor as any).getSampleDoctors();

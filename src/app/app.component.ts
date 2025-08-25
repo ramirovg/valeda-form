@@ -1,34 +1,46 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, PLATFORM_ID, inject, OnInit } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { PatientSearchComponent } from './components/patient-search/patient-search.component';
 import { ValedaFormComponent } from './components/valeda-form/valeda-form.component';
+import { NotificationComponent } from './components/notification/notification.component';
 import { ValedaTreatment } from './models/valeda.models';
 
 type ViewMode = 'search' | 'form';
 
 @Component({
     selector: 'app-root',
-    imports: [CommonModule, RouterOutlet, PatientSearchComponent, ValedaFormComponent],
+    imports: [CommonModule, RouterOutlet, PatientSearchComponent, ValedaFormComponent, NotificationComponent],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
+
   title = 'Sistema de Tratamiento de Fotobiomodulación';
   currentView: ViewMode = 'search';
-  selectedTreatment?: ValedaTreatment;
+  selectedTreatment: ValedaTreatment | undefined = undefined;
+
+  ngOnInit(): void {
+    console.log(`[AppComponent] ngOnInit, isBrowser: ${this.isBrowser}, currentView: ${this.currentView}`);
+  }
 
   onTreatmentSelected(treatment: ValedaTreatment): void {
+    console.log(`[AppComponent] onTreatmentSelected, currentView: ${this.currentView}`);
     this.selectedTreatment = treatment;
     this.currentView = 'form';
+    console.log(`[AppComponent] onTreatmentSelected, new currentView: ${this.currentView}`);
   }
 
   onCreateNewTreatment(): void {
+    console.log(`[AppComponent] onCreateNewTreatment, currentView: ${this.currentView}`);
     this.selectedTreatment = undefined;
     this.currentView = 'form';
+    console.log(`[AppComponent] onCreateNewTreatment, new currentView: ${this.currentView}`);
   }
 
-  onTreatmentSaved(treatment: ValedaTreatment): void {
+  onTreatmentSaved(_treatment: ValedaTreatment): void {
     // Optionally show success message
     this.backToSearch();
   }
@@ -42,18 +54,25 @@ export class AppComponent {
   }
 
   private backToSearch(): void {
+    console.log(`[AppComponent] backToSearch, currentView: ${this.currentView}`);
     this.selectedTreatment = undefined;
     this.currentView = 'search';
+    console.log(`[AppComponent] backToSearch, new currentView: ${this.currentView}`);
   }
 
   private printTreatmentRecord(treatment: ValedaTreatment): void {
+    if (!this.isBrowser) {
+      return;
+    }
+
     // Create a print-specific window with the treatment data
     const printWindow = window.open('', '_blank', 'width=800,height=600');
     if (printWindow) {
       printWindow.document.write(this.generatePrintHTML(treatment));
       printWindow.document.close();
       printWindow.focus();
-      printWindow.print();
+      // Delay print to allow images and styles to load
+      setTimeout(() => printWindow.print(), 500);
     }
   }
 
@@ -273,7 +292,7 @@ export class AppComponent {
             line-height: 1.2;
           }
           .phone-lines { 
-            border: 1px solid #168D4D;
+            border: 1px solid #168D4D; 
             background: #f0fdf4;
             text-align: center; 
             padding: 4px;

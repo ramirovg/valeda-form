@@ -22,7 +22,7 @@ export class TreatmentController {
 
       if (hasSearchFilters) {
         // Use search functionality if filters are present
-        const searchFilters: SearchFilters = {
+        const qFilters: SearchFilters = {
           name: req.query['name'] as string,
           doctor: req.query['doctor'] as string,
           treatmentType: req.query['treatmentType'] as string,
@@ -31,14 +31,14 @@ export class TreatmentController {
         };
 
         // Remove undefined values
-        Object.keys(searchFilters).forEach(key => {
-          if (searchFilters[key as keyof SearchFilters] === undefined) {
-            delete searchFilters[key as keyof SearchFilters];
+        Object.keys(qFilters).forEach(key => {
+          if (qFilters[key as keyof SearchFilters] === undefined) {
+            delete qFilters[key as keyof SearchFilters];
           }
         });
 
-        console.log('🔍 Searching treatments with filters:', searchFilters);
-        result = await TreatmentService.searchTreatments(searchFilters, paginationOptions);
+        console.log('🔍 Searching treatments with filters:', qFilters);
+        result = await TreatmentService.searchTreatments(qFilters, paginationOptions);
       } else {
         // Return all treatments if no filters
         result = await TreatmentService.getAllTreatments(paginationOptions);
@@ -54,12 +54,13 @@ export class TreatmentController {
       res.json(result);
     } catch (error) {
       console.error('Error getting treatments:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to load treatments',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
+
 
   /**
    * GET /api/treatments/search - Search treatments
@@ -92,7 +93,7 @@ export class TreatmentController {
       res.json(result);
     } catch (error) {
       console.error('Error searching treatments:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to search treatments',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -106,16 +107,16 @@ export class TreatmentController {
     try {
       const { id } = req.params;
       const treatment = await TreatmentService.getTreatmentById(id);
-      
+
       if (!treatment) {
         res.status(404).json({ error: 'Treatment not found' });
         return;
       }
-      
+
       res.json(treatment);
     } catch (error) {
       console.error('Error getting treatment:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to load treatment',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -128,10 +129,10 @@ export class TreatmentController {
   static async createTreatment(req: Request, res: Response): Promise<void> {
     try {
       const treatmentData = req.body as Partial<ITreatment>;
-      
+
       // Validate required fields
       if (!treatmentData.patient?.name || !treatmentData.doctor?.name || !treatmentData.treatmentType) {
-        res.status(400).json({ 
+        res.status(400).json({
           error: 'Missing required fields',
           required: ['patient.name', 'doctor.name', 'treatmentType']
         });
@@ -147,14 +148,14 @@ export class TreatmentController {
       res.status(201).json(treatment);
     } catch (error) {
       console.error('Error creating treatment:', error);
-      
+
       if (error instanceof Error && error.name === 'ValidationError') {
-        res.status(400).json({ 
+        res.status(400).json({
           error: 'Validation failed',
           details: error.message
         });
       } else {
-        res.status(500).json({ 
+        res.status(500).json({
           error: 'Failed to create treatment',
           details: error instanceof Error ? error.message : 'Unknown error'
         });
@@ -169,29 +170,29 @@ export class TreatmentController {
     try {
       const { id } = req.params;
       const updateData = req.body as Partial<ITreatment>;
-      
+
       const treatment = await TreatmentService.updateTreatment(id, updateData);
-      
+
       if (!treatment) {
         res.status(404).json({ error: 'Treatment not found' });
         return;
       }
-      
+
       res.json(treatment);
     } catch (error) {
       console.error('Error updating treatment:', error);
-      
+
       if (error instanceof Error && error.name === 'ValidationError') {
-        res.status(400).json({ 
+        res.status(400).json({
           error: 'Validation failed',
           details: error.message
         });
       } else if (error instanceof Error && error.name === 'CastError') {
-        res.status(400).json({ 
+        res.status(400).json({
           error: 'Invalid treatment ID format'
         });
       } else {
-        res.status(500).json({ 
+        res.status(500).json({
           error: 'Failed to update treatment',
           details: error instanceof Error ? error.message : 'Unknown error'
         });
@@ -206,22 +207,22 @@ export class TreatmentController {
     try {
       const { id } = req.params;
       const success = await TreatmentService.deleteTreatment(id);
-      
+
       if (!success) {
         res.status(404).json({ error: 'Treatment not found' });
         return;
       }
-      
+
       res.json({ message: 'Treatment deleted successfully' });
     } catch (error) {
       console.error('Error deleting treatment:', error);
-      
+
       if (error instanceof Error && error.name === 'CastError') {
-        res.status(400).json({ 
+        res.status(400).json({
           error: 'Invalid treatment ID format'
         });
       } else {
-        res.status(500).json({ 
+        res.status(500).json({
           error: 'Failed to delete treatment',
           details: error instanceof Error ? error.message : 'Unknown error'
         });
@@ -232,13 +233,13 @@ export class TreatmentController {
   /**
    * GET /api/treatments/statistics - Get treatment statistics
    */
-  static async getStatistics(req: Request, res: Response): Promise<void> {
+  static async getStatistics(_req: Request, res: Response): Promise<void> {
     try {
       const statistics = await TreatmentService.getStatistics();
       res.json(statistics);
     } catch (error) {
       console.error('Error getting treatment statistics:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to get treatment statistics',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
