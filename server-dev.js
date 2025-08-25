@@ -7,9 +7,9 @@ const cors = require('cors');
 const path = require('path');
 
 // Import compiled server modules
-const { databaseService } = require('./dist/valeda-form/server/src/server/config/database.config.js');
-const { apiRoutes } = require('./dist/valeda-form/server/src/server/routes/index.js');
-const { errorHandler, requestLogger } = require('./dist/valeda-form/server/src/server/middleware/validation.middleware.js');
+const { databaseService } = require('./dist/valeda-form/server/config/database.config.js');
+const { apiRoutes } = require('./dist/valeda-form/server/routes/index.js');
+const { errorHandler, requestLogger } = require('./dist/valeda-form/server/middleware/validation.middleware.js');
 
 const app = express();
 const PORT = process.env.API_PORT || 3001;
@@ -38,10 +38,10 @@ databaseService.connect().then(() => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
-    message: 'API server is running' 
+    message: 'API server is running'
   });
 });
 
@@ -53,7 +53,7 @@ app.use(errorHandler);
 
 // 404 handler
 app.use('*', (req, res) => {
-  res.status(404).json({ 
+  res.status(404).json({
     error: 'API endpoint not found',
     path: req.originalUrl,
     availableEndpoints: [
@@ -71,12 +71,12 @@ app.listen(PORT, () => {
 📊 Health check: http://localhost:${PORT}/health
 💾 Database: MongoDB with Mongoose ODM
 🔧 Environment: Development
-    
+
 Available endpoints:
 • GET    /api/treatments - List treatments
 • POST   /api/treatments - Create treatment
 • GET    /api/treatments/:id - Get treatment
-• PUT    /api/treatments/:id - Update treatment  
+• PUT    /api/treatments/:id - Update treatment
 • DELETE /api/treatments/:id - Delete treatment
 • GET    /api/doctors/sample - Get sample doctors
 • GET    /health - Health check
@@ -86,7 +86,7 @@ Available endpoints:
 // Graceful shutdown
 const gracefulShutdown = async (signal) => {
   console.log(`\n🛑 Received ${signal}, shutting down API server...`);
-  
+
   try {
     await databaseService.disconnect();
     console.log('✅ Database disconnected');

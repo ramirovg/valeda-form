@@ -6,10 +6,10 @@ import { databaseService } from '../config/database.config';
 const router = Router();
 
 // Health check endpoint
-router.get('/health', async (req, res) => {
+router.get('/health', async (_req, res) => {
   try {
     const healthCheck = await databaseService.healthCheck();
-    
+
     const response = {
       status: 'healthy',
       timestamp: new Date().toISOString(),
@@ -37,7 +37,7 @@ router.get('/health', async (req, res) => {
 });
 
 // API version endpoint
-router.get('/version', (req, res) => {
+router.get('/version', (_req, res) => {
   res.json({
     name: 'Valeda Treatment API',
     version: '2.0.0',

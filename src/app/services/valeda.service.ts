@@ -1,43 +1,60 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal, computed, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable, of, tap, catchError, map } from 'rxjs';
-import { ValedaTreatment, Patient, Doctor, TreatmentSession, SearchFilters } from '../models/valeda.models';
+import { Observable, of, tap, catchError, map } from 'rxjs';
+import { ValedaTreatment, Doctor, TreatmentSession, SearchFilters } from '../models/valeda.models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ValedaService {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly apiUrl = this.getApiUrl();
-  private treatmentsSubject = new BehaviorSubject<ValedaTreatment[]>([]);
+
+  // Modern Angular Signals-based state management
+  private readonly _treatments = signal<ValedaTreatment[]>([]);
+
+  // Public readonly access to treatments
+  public readonly treatments = this._treatments.asReadonly();
+
+  // Computed values for derived state
+  public readonly treatmentCount = computed(() => this.treatments().length);
+  public readonly hasLoadedTreatments = computed(() => this.treatments().length > 0);
 
   constructor(private http: HttpClient) {
+    console.log(`[ValedaService] constructor, isBrowser: ${this.isBrowser}`);
     // Load treatments from server on initialization
-    this.loadTreatments();
+    if (this.isBrowser) {
+      this.loadTreatments();
+    }
   }
 
   /**
    * Get API URL based on environment
    */
   private getApiUrl(): string {
-    // Check if we're in development and have a separate API server
-    if (typeof window !== 'undefined') {
-      const isDev = window.location.hostname === 'localhost' && 
+    if (this.isBrowser) {
+      const isDev = window.location.hostname === 'localhost' &&
                    (window.location.port === '4200' || window.location.port === '4201');
       return isDev ? 'http://localhost:3001/api' : '/api';
     }
-    return '/api';
+    // Default for server-side rendering
+    return 'http://localhost:3001/api';
   }
 
   /**
-   * Get all treatments as observable
+   * Get all treatments as observable - Updates internal signal state
    */
   getTreatments(): Observable<ValedaTreatment[]> {
+    console.log('[ValedaService] getTreatments');
     return this.http.get<{data: ValedaTreatment[], pagination: any}>(`${this.apiUrl}/treatments`).pipe(
       map(response => response.data), // Extract the data array from paginated response
       tap(treatments => {
-        // Convert date strings to Date objects
+        console.log('[ValedaService] getTreatments success, processing treatments');
+        // Convert date strings to Date objects and update signal
         const processedTreatments = treatments.map(treatment => this.processTreatmentDates(treatment));
-        this.treatmentsSubject.next(processedTreatments);
+        this._treatments.set(processedTreatments);
       }),
       catchError(error => {
         console.error('Error loading treatments:', error);
@@ -70,7 +87,7 @@ export class ValedaService {
       map(response => response.data), // Extract the data array from paginated response
       tap(treatments => {
         const processedTreatments = treatments.map(treatment => this.processTreatmentDates(treatment));
-        this.treatmentsSubject.next(processedTreatments);
+        this._treatments.set(processedTreatments);
       }),
       catchError(error => {
         console.error('Error searching treatments:', error);
@@ -81,15 +98,17 @@ export class ValedaService {
 
   /**
    * Search treatments by filters (Frontend filtering - instant results for small datasets)
+   * Uses signals for reactive filtering
    */
   searchTreatmentsFrontend(filters: SearchFilters): Observable<ValedaTreatment[]> {
-    return this.treatmentsSubject.pipe(
-      map(allTreatments => {
-        if (!filters || (!filters.name && !filters.doctor && !filters.dateFrom && !filters.dateTo)) {
-          return allTreatments;
-        }
+    // Convert signal to observable for compatibility
+    const allTreatments = this.treatments();
+    
+    if (!filters || (!filters.name && !filters.doctor && !filters.dateFrom && !filters.dateTo)) {
+      return of(allTreatments);
+    }
 
-        return allTreatments.filter(treatment => {
+    const filteredResults = allTreatments.filter(treatment => {
           // Name filtering (case-insensitive partial match)
           if (filters.name) {
             const searchName = filters.name.toLowerCase().trim();
@@ -128,8 +147,8 @@ export class ValedaService {
           
           return true;
         });
-      })
-    );
+        
+    return of(filteredResults);
   }
 
   /**
@@ -198,8 +217,10 @@ export class ValedaService {
         this.refreshTreatments();
       }),
       catchError(error => {
-        console.error('Error updating treatment:', error);
-        return of(null);
+        console.error('Error updating treatment via API:', error);
+        console.log('📱 Falling back to localStorage update');
+        // Fall back to localStorage
+        return this.updateTreatmentLocalStorage(id, treatment);
       })
     );
   }
@@ -268,7 +289,6 @@ export class ValedaService {
   private initializeSessions(): TreatmentSession[] {
     return Array.from({ length: 9 }, (_, index) => ({
       sessionNumber: index + 1,
-      date: undefined,
       technician: '',
       time: ''
     }));
@@ -316,15 +336,22 @@ export class ValedaService {
    */
   private loadTreatmentsFromLocalStorage(): Observable<ValedaTreatment[]> {
     console.log('📱 Falling back to localStorage');
-    if (typeof localStorage !== 'undefined') {
+    if (this.isBrowser) {
       try {
         const stored = localStorage.getItem('valeda-treatments');
         if (stored) {
+          console.log('[ValedaService] Found treatments in localStorage');
           const treatments = JSON.parse(stored);
           // Convert date strings back to Date objects
           const processedTreatments = treatments.map((treatment: any) => this.processTreatmentDates(treatment));
-          this.treatmentsSubject.next(processedTreatments);
+          this._treatments.set(processedTreatments);
           return of(processedTreatments);
+        } else {
+          console.log('[ValedaService] No treatments in localStorage, creating sample data');
+          const sampleTreatments = this.createSampleTreatments();
+          this._treatments.set(sampleTreatments);
+          localStorage.setItem('valeda-treatments', JSON.stringify(sampleTreatments));
+          return of(sampleTreatments);
         }
       } catch (error) {
         console.error('Error loading treatments from localStorage:', error);
@@ -334,9 +361,63 @@ export class ValedaService {
   }
 
   /**
+   * Fallback: Update treatment in localStorage
+   */
+  private updateTreatmentLocalStorage(id: string, treatmentUpdate: Partial<ValedaTreatment>): Observable<ValedaTreatment | null> {
+    console.log('📱 Updating treatment in localStorage:', id);
+    if (!this.isBrowser) {
+      return of(null);
+    }
+
+    try {
+      const stored = localStorage.getItem('valeda-treatments');
+      if (!stored) {
+        console.error('No treatments found in localStorage');
+        return of(null);
+      }
+
+      const treatments = JSON.parse(stored);
+      const treatmentIndex = treatments.findIndex((t: any) => (t.id || t._id) === id);
+      
+      if (treatmentIndex === -1) {
+        console.error('Treatment not found in localStorage:', id);
+        return of(null);
+      }
+
+      // Update the treatment with new data
+      const existingTreatment = treatments[treatmentIndex];
+      const updatedTreatment = {
+        ...existingTreatment,
+        ...treatmentUpdate,
+        id: existingTreatment.id || existingTreatment._id,
+        // Preserve creation date from existing treatment
+        creationDate: existingTreatment.creationDate || new Date()
+      };
+
+      // Process dates to ensure they're properly formatted
+      const processedTreatment = this.processTreatmentDates(updatedTreatment);
+      treatments[treatmentIndex] = processedTreatment;
+
+      // Save back to localStorage
+      localStorage.setItem('valeda-treatments', JSON.stringify(treatments));
+      
+      // Update the internal signal
+      this._treatments.set(treatments.map((t: any) => this.processTreatmentDates(t)));
+
+      console.log('✅ Treatment updated successfully in localStorage');
+      return of(processedTreatment);
+      
+    } catch (error) {
+      console.error('Error updating treatment in localStorage:', error);
+      return of(null);
+    }
+  }
+
+  /**
    * Fallback: Create treatment in localStorage
    */
   private createTreatmentLocalStorage(treatment: Omit<ValedaTreatment, 'id'>): Observable<ValedaTreatment> {
+    console.log('📱 Creating treatment in localStorage');
     const newTreatment: ValedaTreatment = {
       ...treatment,
       id: this.generateId(),
@@ -346,13 +427,13 @@ export class ValedaService {
       creationDate: new Date()
     };
     
-    if (typeof localStorage !== 'undefined') {
+    if (this.isBrowser) {
       try {
         const stored = localStorage.getItem('valeda-treatments');
         const treatments = stored ? JSON.parse(stored) : [];
         treatments.push(newTreatment);
         localStorage.setItem('valeda-treatments', JSON.stringify(treatments));
-        this.treatmentsSubject.next(treatments);
+        this._treatments.set(treatments);
       } catch (error) {
         console.error('Error saving to localStorage:', error);
       }
@@ -366,5 +447,74 @@ export class ValedaService {
    */
   private generateId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+
+  /**
+   * Create sample treatments for testing
+   */
+  private createSampleTreatments(): ValedaTreatment[] {
+    const sampleTreatments: ValedaTreatment[] = [
+      {
+        id: this.generateId(),
+        patient: {
+          name: 'María González Hernández',
+          birthDate: new Date('1980-05-15'),
+          age: 44
+        },
+        doctor: {
+          name: 'Dr. García Hernández'
+        },
+        creationDate: new Date('2024-01-15'),
+        treatmentType: 'both-eyes',
+        sessions: this.initializeSessions(),
+        additionalIndications: 'Revisión cada 3 días. Mantener regularidad en horarios.'
+      },
+      {
+        id: this.generateId(),
+        patient: {
+          name: 'Juan Carlos Ramírez',
+          birthDate: new Date('1965-11-20'),
+          age: 59
+        },
+        doctor: {
+          name: 'Dra. María Rodríguez'
+        },
+        creationDate: new Date('2024-02-03'),
+        treatmentType: 'right-eye',
+        sessions: this.initializeSessions(),
+        additionalIndications: 'Paciente con hipertensión controlada. Monitorear presión ocular.'
+      },
+      {
+        id: this.generateId(),
+        patient: {
+          name: 'Ana Lucía Mendoza',
+          birthDate: new Date('1975-08-10'),
+          age: 49
+        },
+        doctor: {
+          name: 'Dr. Carlos Mendoza'
+        },
+        creationDate: new Date('2024-02-20'),
+        treatmentType: 'left-eye',
+        sessions: this.initializeSessions(),
+        additionalIndications: 'Primera experiencia con fotobiomodulación. Explicar procedimiento en cada sesión.'
+      }
+    ];
+
+    // Add some completed sessions to the first treatment for demonstration
+    sampleTreatments[0].sessions[0] = {
+      sessionNumber: 1,
+      date: new Date('2024-01-16'),
+      technician: 'Mayra Ruiz',
+      time: '10:30'
+    };
+    sampleTreatments[0].sessions[1] = {
+      sessionNumber: 2,
+      date: new Date('2024-01-19'),
+      technician: 'Mario Rodriguez',
+      time: '14:15'
+    };
+
+    return sampleTreatments;
   }
 }

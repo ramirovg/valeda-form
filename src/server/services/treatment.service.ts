@@ -5,8 +5,8 @@ import { FilterQuery, SortOrder } from 'mongoose';
 export interface SearchFilters {
   name?: string;
   doctor?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
+  dateFrom?: Date | undefined;
+  dateTo?: Date | undefined;
   treatmentType?: string;
 }
 
@@ -193,7 +193,7 @@ export class TreatmentService {
   static async deleteTreatment(id: string): Promise<boolean> {
     try {
       const result = await Treatment.findByIdAndDelete(id);
-      
+
       if (result) {
         console.log('🗑️ Deleted treatment:', {
           id: result.id,
@@ -201,7 +201,7 @@ export class TreatmentService {
         });
         return true;
       }
-      
+
       return false;
     } catch (error) {
       console.error(`Error deleting treatment ${id}:`, error);
@@ -241,8 +241,8 @@ export class TreatmentService {
         return total + treatment.sessions.filter((s: any) => s.date).length;
       }, 0);
 
-      const averageSessionsPerTreatment = totalTreatments > 0 
-        ? Math.round((completedSessions / totalTreatments) * 100) / 100 
+      const averageSessionsPerTreatment = totalTreatments > 0
+        ? Math.round((completedSessions / totalTreatments) * 100) / 100
         : 0;
 
       return {

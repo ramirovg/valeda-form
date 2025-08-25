@@ -5,7 +5,7 @@ import { Types } from 'mongoose';
 export const validateObjectId = (paramName: string = 'id') => {
   return (req: Request, res: Response, next: NextFunction): void => {
     const id = req.params[paramName];
-    
+
     if (!id) {
       res.status(400).json({
         error: `Missing required parameter: ${paramName}`
@@ -73,7 +73,7 @@ export const validateTreatmentData = (req: Request, res: Response, next: NextFun
       if (typeof session.sessionNumber !== 'number' || session.sessionNumber < 1 || session.sessionNumber > 20) {
         errors.push(`Session ${index + 1}: sessionNumber must be a number between 1 and 20`);
       }
-      
+
       if (session.date) {
         const sessionDate = new Date(session.date);
         if (isNaN(sessionDate.getTime())) {
@@ -133,7 +133,7 @@ export const validateDoctorData = (req: Request, res: Response, next: NextFuncti
 };
 
 // Error handling middleware
-export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction): void => {
+export const errorHandler = (err: Error, _req: Request, res: Response, _next: NextFunction): void => {
   console.error('Unhandled error:', err);
 
   // Mongoose validation error
@@ -174,14 +174,14 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
 export const requestLogger = (req: Request, res: Response, next: NextFunction): void => {
   const start = Date.now();
   const { method, url, ip } = req;
-  
+
   console.log(`📥 ${method} ${url} - ${ip}`);
 
   res.on('finish', () => {
     const duration = Date.now() - start;
     const { statusCode } = res;
     const statusEmoji = statusCode >= 400 ? '❌' : statusCode >= 300 ? '⚠️' : '✅';
-    
+
     console.log(`📤 ${statusEmoji} ${method} ${url} - ${statusCode} - ${duration}ms`);
   });
 

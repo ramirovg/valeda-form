@@ -184,7 +184,7 @@ TreatmentSchema.virtual('id').get(function() {
 // Ensure virtual fields are serialized
 TreatmentSchema.set('toJSON', {
   virtuals: true,
-  transform: function(doc, ret) {
+  transform: function(_doc, ret) {
     delete (ret as any)._id;
     delete (ret as any).__v;
     return ret;

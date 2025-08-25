@@ -1,0 +1,51 @@
+<!-- Notification Container -->
+<div class="notification-container">
+  @for (notification of notifications(); track notification.id) {
+    <div 
+      [class]="getNotificationClasses(notification)"
+      role="alert"
+      [attr.aria-live]="notification.type === 'error' ? 'assertive' : 'polite'"
+    >
+      <div class="flex items-start">
+        <!-- Icon -->
+        <div class="flex-shrink-0 mr-3 text-lg">
+          {{ getNotificationIcon(notification.type) }}
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 min-w-0">
+          <h4 class="font-medium text-sm mb-1">{{ notification.title }}</h4>
+          <p class="text-xs opacity-90">{{ notification.message }}</p>
+          
+          <!-- Timestamp -->
+          <div class="text-xs opacity-75 mt-2">
+            {{ notification.timestamp | date:'short' }}
+          </div>
+        </div>
+
+        <!-- Close Button -->
+        <button
+          (click)="closeNotification(notification.id)"
+          class="flex-shrink-0 ml-4 p-1 rounded-md hover:bg-black hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200"
+          [attr.aria-label]="'Cerrar notificación: ' + notification.title"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Clear All Button (only show when there are multiple notifications) -->
+  @if (notifications().length > 1) {
+    <div class="fixed top-16 right-4 z-40">
+      <button
+        (click)="closeAll()"
+        class="text-xs bg-gray-800 text-white px-3 py-1 rounded-md hover:bg-gray-700 transition-colors duration-200 shadow-lg"
+      >
+        Cerrar Todas
+      </button>
+    </div>
+  }
+</div>
