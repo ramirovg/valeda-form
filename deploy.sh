@@ -6,9 +6,9 @@ set -e  # Exit on any error
 
 # Configuration
 ENVIRONMENT=${1:-production}
-APP_NAME="valeda-form"
+APP_NAME="valeda-form-api"
 REMOTE_USER="root"
-REMOTE_HOST="your-digitalocean-server-ip"
+REMOTE_HOST="104.248.69.154"
 REMOTE_PATH="/var/www/oftalmonet.mx/valeda"
 LOCAL_BUILD_DIR="dist/valeda-form"
 BACKUP_DIR="/var/backups/valeda-form"
@@ -111,33 +111,33 @@ log "Deploying on server..."
 
 ssh "$REMOTE_USER@$REMOTE_HOST" "
     set -e
-    
+
     # Extract new version
     cd /tmp
     tar -xzf '$PACKAGE_NAME'
-    
+
     # Stop existing services
     if command -v pm2 &> /dev/null; then
         pm2 stop $APP_NAME || echo 'App not running'
     fi
-    
+
     # Create directory structure
     sudo mkdir -p '$REMOTE_PATH'
-    
+
     # Deploy new version
     sudo cp -r $LOCAL_BUILD_DIR/* '$REMOTE_PATH/'
     sudo cp server-production.js '$REMOTE_PATH/'
     sudo cp ecosystem.config.js '$REMOTE_PATH/'
     sudo cp package*.json '$REMOTE_PATH/'
-    
+
     # Set permissions
     sudo chown -R www-data:www-data '$REMOTE_PATH'
     sudo chmod -R 755 '$REMOTE_PATH'
-    
+
     # Install production dependencies
     cd '$REMOTE_PATH'
     sudo -u www-data npm install --only=prod
-    
+
     # Start services
     if command -v pm2 &> /dev/null; then
         sudo -u www-data pm2 start ecosystem.config.js --env $ENVIRONMENT
@@ -145,11 +145,11 @@ ssh "$REMOTE_USER@$REMOTE_HOST" "
     else
         echo 'PM2 not found. Start manually: node server-production.js'
     fi
-    
+
     # Cleanup
     rm -f /tmp/$PACKAGE_NAME
     rm -rf /tmp/$LOCAL_BUILD_DIR
-    
+
     echo 'Deployment completed successfully!'
 "
 

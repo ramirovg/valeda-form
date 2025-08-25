@@ -6,7 +6,7 @@ module.exports = {
   apps: [
     {
       name: 'valeda-form-api',
-      script: 'dist/valeda-form/server-production.js',
+      script: 'server-production.js',
       cwd: '/var/www/oftalmonet.mx/valeda',
       instances: 1,
       autorestart: true,
@@ -34,9 +34,9 @@ module.exports = {
   deploy: {
     production: {
       user: 'root',
-      host: 'your-digitalocean-server-ip',
+      host: '104.248.69.154',
       ref: 'origin/deployment/production-setup',
-      repo: 'https://github.com/your-username/valeda-form.git',
+      repo: 'https://github.com/ramirovg/valeda-form.git',
       path: '/var/www/oftalmonet.mx/valeda',
       'pre-deploy-local': '',
       'post-deploy': 'npm install && npm run build:production && pm2 reload ecosystem.config.js --env production',
