@@ -41,5 +41,9 @@ testem.log
 .DS_Store
 Thumbs.db
 
+# Windows-specific artifacts (npm creates these on Windows)
+nul
+NUL
+
 # Claude Code
 .claude/
